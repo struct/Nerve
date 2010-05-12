@@ -1,4 +1,4 @@
-# Nerve is a cross platform (Win32, Linux, OSX) dynamic tracing tool based on ragweed (http://github.com/tduehr/ragweed)
+# Nerve is a cross platform (Win32, Linux, OSX) dynamic tracing tool
 
 ## What is it?
 

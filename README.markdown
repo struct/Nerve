@@ -4,6 +4,9 @@
 
     Nerve is based on, and requires, Ragweed http://github.com/tduehr/ragweed
 
+    To learn more about Ragweed, read this:
+    http://chargen.matasano.com/chargen/2009/8/27/ruby-for-pentesters-the-dark-side-i-ragweed.html
+
     Nerve is a dynamic tracing tool for native x86 code. I wrote it specifically to get
     an idea of how much code coverage my fuzzers were getting. It has other uses as a basic
     dynamic hit tracer as well.

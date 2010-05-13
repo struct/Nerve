@@ -56,6 +56,7 @@
 
     Linux
     0x12345678, function_name, ncurses.so.5.1
+    0x0805af20, function_name
 
     OS X
     0x12345678, function_name

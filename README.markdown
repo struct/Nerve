@@ -1,4 +1,4 @@
-# Nerve is a cross platform (Win32, Linux, OSX) dynamic tracing tool
+# Nerve is a simple cross platform (Win32, Linux, OSX) x86 hit tracer
 
 ## What is it?
 
@@ -11,24 +11,33 @@
     an idea of how much code coverage my fuzzers were getting. It has other uses as a basic
     dynamic hit tracer as well.
 
-    Nerve showcases the best part about Ragweed: cross platform debugging
-
-    With Nerve you can do hit tracing on Win32, OSX and Linux all from the same tool.
+    Nerve showcases the best part about Ragweed: cross platform debugging. I originally
+    wrote Nerve as a small Ragweed script that kept stats on the functions my fuzzers
+    were triggering in my target process. This helped me gauge what code paths my fuzzer was
+    reaching and which ones it wasn't. It only took a few hours to make it work on all Ragweed
+    supported platforms, and since then I have used it more than once. Hopefully the code
+    will help other people write better Ragweed tools. I do plan to keep Nerve updated with
+    newer features such as better output. I have some utility scripts on the way that help
+    generate the breakpoint files required by Nerve, but for now you will have to build them
+    by hand.
 
 ## Features
 
     - Cross platform. It works on Win32 (XP SP2/SP3, Win7), Linux (Ubuntu) and OSX
     - Easy breakpoint configuration via simple csv text files
 
+## Todo
+
+    - Better output such as graphviz, statistics, function arguments etc...
+    - Nerve is helping me find the areas of Ragweed that need the most improvement
+    - A GUI would be relatively straight forward to write, I just have to find the time
+  
 ## Requirements
 
-    Like all complex software, Nerve has a few dependencies. But don't worry, theres no need
-    to install an SQL server or compile any code! All dependencies can be installed via Ruby gems
-    on any platform.
+    Nerve has one small dependency. But don't worry, theres no need to install an SQL server
+    or compile any code! The dependency, Ragweed, can be installed via Ruby gems on any platform.
 
-    Dependencies:
-
-    - ragweed (a cross platform debugger library)
+    - Ragweed (a cross platform debugger library)
     - http://github.com/tduehr/ragweed
     - gem install -r ragweed
 

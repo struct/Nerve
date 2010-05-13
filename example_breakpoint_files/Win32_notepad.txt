@@ -1,0 +1,6 @@
+; Example notepad.exe breakpoint file
+
+kernel32!CreateFileW, CreateFileW
+kernel32!DeviceIoControl, DeviceIOControl
+kernel32!ReadFile, ReadFile
+kernel32!WriteFile, WriteFile

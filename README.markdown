@@ -28,9 +28,12 @@
 
 ## Todo
 
+	Nerve is a simple tool, but we plan to grow it ...
+
     - Better output such as graphviz, statistics, function arguments etc...
-    - Nerve is helping me find the areas of Ragweed that need the most improvement
-    - A GUI would be relatively straight forward to write, I just have to find the time
+	- A basic RubyWX GUI (this will be optional)
+	- Redis database support (this will be optional)
+    - Nerve is helping us find the areas of Ragweed that need the most improvement
   
 ## Requirements
 
@@ -122,3 +125,12 @@
     kernel32!WriteFile - 0 hit(s)
     kernel32!CreateFileW - 122 hit(s)
     kernel32!DeviceIoControl - 90 hit(s)
+
+
+## Who
+
+Nerve was written by Chris Rohlf, and is also developed by Alex Rad
+
+Ragweed was written by Thomas Ptacek, ported to OSX by Timur Duehr and ported to Linux by Chris Rohlf
+
+

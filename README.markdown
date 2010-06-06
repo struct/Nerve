@@ -57,18 +57,19 @@
 
 ## Breakpoint File Example
 
-    Nerve breakpoint files are a simple CSV format. Here are some examples:
+    Win32 Breakpoint Configuration
+    break=<Address or Function!Library>, name=<Function Name>, bpc=<Breakpoint Count (Optional)>
+    break=0x12345678, name=SomeFunction, bpc=2
+    break=kernel32!CreateFileW, name=SomeFunction
 
-    Win32:
-    0x12345678, SomeLabel
-    kernel32!CreateFileW, Label
+    Linux Breakpoint Configuration
+    break=<Address>, name=<Function Name>, lib=<LibraryName (optional)>, bpc=<Breakpoint Count (Optional)>
+    break=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1
+    break=0x12345678, name=function_name
 
-    Linux
-    0x12345678, function_name, ncurses.so.5.1
-    0x0805af20, function_name
-
-    OS X
-    0x12345678, function_name
+    OS X  Breakpoint Configuration: 
+    break=<Address>, name=<Function Name>, bpc=<Breakpoint Count (Optional)>
+    break=0x12345678, name=function_name, bpc=6
 
 ## Examples
 

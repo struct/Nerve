@@ -1,11 +1,12 @@
-; This is an example breakpoint file for Ubuntu 10.4
-; It has breakpoints set for a few functions
-; Your libc version may be different then mine, in
-; the event it is just use 'readelf -s <libc>'
+; This is how you set breakpoints within shared objects
+; You can use 'readelf -s' to get the proper address for
+; a function inside of your shared object.
+; The order of the parameters does not matter
 
-0x006ff40, malloc, /lib/tls/i686/cmov/libc-2.11.1.so
-0x007c830, wmemcpy, /lib/tls/i686/cmov/libc-2.11.1.so
-0x0074f20, memcpy, /lib/tls/i686/cmov/libc-2.11.1.so
-0x006fe60, free, /lib/tls/i686/cmov/libc-2.11.1.so
-0x00bdde0, read, /lib/tls/i686/cmov/libc-2.11.1.so
-0x00bde60, write, /lib/tls/i686/cmov/libc-2.11.1.so
+name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40
+bp=0x08055590, name=mp_add, bpc=10
+bp=0x007c830, name=wmemcpy, lib=/lib/tls/i686/cmov/libc-2.11.1.so
+bp=0x0074f20, name=memcpy, lib=/lib/tls/i686/cmov/libc-2.11.1.so
+bp=0x006fe60, name=free, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=1
+bp=0x00bdde0, name=read, lib=/lib/tls/i686/cmov/libc-2.11.1.so
+bp=0x00bde60, name=write, lib=/lib/tls/i686/cmov/libc-2.11.1.so

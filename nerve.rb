@@ -3,13 +3,19 @@
 ## Nerve is a ragweed based, cross platform code tracer. Nerve takes a breakpoint
 ## file with the following format:
 ##
-## Win32 Example: 0xXXXXXXXX, SomeLabel
-## Win32 Example: kernel32!CreateFileW, Label
+## Win32 Breakpoint Configuration
+## break=<Address or Function!Library>, name=<Function Name>, bpc=<Breakpoint Count (Optional)>
+## break=0x12345678, name=SomeFunction, bpc=2
+## break=kernel32!CreateFileW, name=SomeFunction
 ##
-## Linux Example: 0xXXXXXXXX, function_name, ncurses.so.5.1
-## Linux Example: 0xXXXXXXXX, function_name
+## Linux Breakpoint Configuration
+## break=<Address>, name=<Function Name>, lib=<LibraryName (optional)>, bpc=<Breakpoint Count (Optional)>
+## break=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1
+## break=0x12345678, name=function_name
 ##
-## OS X  Example: 0xXXXXXXXX, function_name
+## OS X  Breakpoint Configuration: 
+## break=<Address>, name=<Function Name>, bpc=<Breakpoint Count (Optional)>
+## break=0x12345678, name=function_name, bpc=6
 ##
 ## Chris @ Matasano.com
 
@@ -17,6 +23,7 @@ require 'rubygems'
 require 'ragweed'
 require 'optparse'
 require 'handlers'
+require 'ostruct'
 require 'common/parse_bp_file'
 require 'common/output'
 require 'common/common'
@@ -26,20 +33,22 @@ class Nerve
 
     def initialize(pid, bp_file)
         @pid = pid
-        @bps = Hash.new
-        @stats = Hash.new
+        @bps = Array.new
         @threads = Array.new
         @out = NERVE_OPTS[:out]
 
         case
             when RUBY_PLATFORM =~ /win(dows|32)/i
-                parse_win32_bp_file(bp_file)
 
-                if @pid.to_i == 0
+                parse_breakpoint_file(bp_file)
+
+                if @pid.kind_of? String
                     @rw = NerveWin32.find_by_regex(/#{@pid}/)
                 else
                     @rw = NerveWin32.new(@pid.to_i)
                 end
+
+                self.check_pid
 
                 ## FIX: debugger32 threads returns an OStruct
                 ## and pid is not always a Numeric value
@@ -52,27 +61,33 @@ class Nerve
                 end
 
             when RUBY_PLATFORM =~ /linux/i
-                if @pid.to_i == 0
+
+                if @pid.kind_of? String
                     @pid = NerveLinux.find_by_regex(/#{@pid}/)
                 else
                     @pid = @pid.to_i
                 end
 
+                self.check_pid
+
                 @so = NerveLinux.procparse(@pid)
-                parse_tux_bp_file(bp_file)
+                parse_breakpoint_file(bp_file)
 
                 @threads = NerveLinux.threads(@pid)
                 self.which_threads
                 @rw = NerveLinux.new(@pid)
 
             when RUBY_PLATFORM =~ /darwin/i
-                parse_osx_bp_file(bp_file)
 
-                if @pid.to_i == 0
+                parse_breakpoint_file(bp_file)
+
+                if @pid.kind_of? String
                     @pid = NerveOSX.find_by_regex(/#{@pid}/)
                 else
                     @pid = @pid.to_i
                 end
+
+                self.check_pid
 
                 @rw = NerveOSX.new(@pid)
                 @threads = @rw.threads
@@ -80,7 +95,6 @@ class Nerve
         end
 
         @rw.save_threads(@threads)
-        @rw.save_stats(@stats)
 
         self.output_init
 
@@ -109,31 +123,39 @@ class Nerve
         self.dump_stats
     end
 
+    def check_pid
+        if @pid.nil?
+            puts "Need a valid PID!"
+        end
+    end
+
     def set_breakpoints
-        @bps.each_pair do |k,v|
-            output_str("Setting breakpoint: [#{k},#{v}]")
+        @bps.each do |o|
+            output_str("Setting breakpoint: [#{o.addr},#{o.name} #{o.lib}]")
+            
             case
                 when RUBY_PLATFORM =~ /win(dows|32)/i
-                    @rw.hook(k, v) do |evt, ctx, loc, args|
+                    @rw.hook(o.addr, o.name) do |evt, ctx, loc, args|
                         if !args.nil?
                             0.upto(args.size) do |i|
                                 #puts @rw.process.read(args[i],512).from_utf16_buffer
                             end
                         end
-                        analyze(v, k)
+                        analyze(o)
                     end
                 when RUBY_PLATFORM =~ /linux/i, RUBY_PLATFORM =~ /darwin/i
-                    @rw.breakpoint_set(k.to_i(16), v, (bpl = lambda do analyze(k, v); end))
+                    @rw.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do analyze(o); end))
             end
         end
     end
 
-    def analyze(addr, function_name)
-        output_hit(addr, function_name)
-        @stats.each_pair do |k,v|
-            if k == addr or k =~ /#{function_name}/
-                @stats.store(k, v+=1)
-            end
+    def analyze(o)
+        output_hit(o.addr, o.name)
+        o.hits += 1
+
+        if o.hits > o.bpc
+            o.flag = false
+            ## XXX Uninstall this breakpoint!
         end
     end
 
@@ -144,15 +166,9 @@ class Nerve
     ## dont have to duplicate this method!
     def dump_stats
         puts "Dumping stats"
-        fn = ""
-        @stats.each_pair do |k,v|
-            @bps.each_pair do |a,b|
-                if a == k
-                    fn = b
-                end
-            end
-            if v != 0
-                puts "#{k} - #{fn} | #{v} hit(s)"
+        @bps.each do |o|
+            if o.addr != 0
+                puts "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
             end
         end
     end

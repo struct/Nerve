@@ -6,11 +6,10 @@ case
 when RUBY_PLATFORM =~ /win(dows|32)/i
     class NerveWin32 < Ragweed::Debugger32
         def initialize(pid)
-            @pid = pid
+#            @pid = pid
             super
         end
 
-        def save_stats(s) @stats = s; end
         def save_bps(b) @bps = b; end
         def save_threads(t) @threads = t; end
 
@@ -20,11 +19,12 @@ when RUBY_PLATFORM =~ /win(dows|32)/i
             puts "Dumping stats"
             puts "Pid is #{ev.pid}"
             puts "Tid is #{ev.tid}"
-            @stats.each_pair do |k,v|
-                puts "#{k} - #{v} hit(s)"
+
+            @bps.each do |o|
+                puts "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
             end
         end
-   
+
         def on_exit_process(ev)
             dump_stats(ev)
             super
@@ -42,20 +42,13 @@ when RUBY_PLATFORM =~ /linux/i
             super
         end
 
-        def save_stats(s) @stats = s; end
         def save_bps(b) @bps = b; end
         def save_threads(t) @threads = t; end
 
         def dump_stats
             puts "Dumping stats"
-            fn = ""
-            @stats.each_pair do |k,v|
-                @bps.each_pair do |a,b|
-                    if a == k
-                        fn = b
-                    end
-                end
-                puts "#{k} - #{fn} | #{v} hit(s)"
+            @bps.each do |o|
+                puts "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
             end
         end
 
@@ -84,20 +77,13 @@ when RUBY_PLATFORM =~ /darwin/i
             super
         end
 
-        def save_stats(s) @stats = s; end
         def save_bps(b) @bps = b; end
         def save_threads(t) @threads = t; end
 
         def dump_stats
             puts "Dumping stats"
-            fn = ""
-            @stats.each_pair do |k,v|
-                @bps.each_pair do |a,b|
-                    if a == k
-                        fn = b
-                    end
-                end
-                puts "#{k} - #{fn} | #{v} hit(s)"
+            @bps.each do |o|
+                puts "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
             end
         end
 

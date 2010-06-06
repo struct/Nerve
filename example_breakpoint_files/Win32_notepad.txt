@@ -1,6 +1,6 @@
 ; Example notepad.exe breakpoint file
 
-kernel32!CreateFileW, CreateFileW
-kernel32!DeviceIoControl, DeviceIOControl
-kernel32!ReadFile, ReadFile
-kernel32!WriteFile, WriteFile
+bp=kernel32!CreateFileW, name=CreateFileW, bpc=1
+bp=kernel32!DeviceIoControl, name=DeviceIOControl, bpc=3
+bp=kernel32!ReadFile, name=ReadFile
+bp=kernel32!WriteFile, nameWriteFile

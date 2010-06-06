@@ -11,13 +11,14 @@ class Nerve
 
             o = OpenStruct.new
             o.base = 0
+			o.flag = true
+			o.hits = 0
 
             r = tl.split(",")
 
-            if r.count < 2 then next end
+            if r.size < 2 then next end
 
             r.each do |e|
-
                 if e.match(/bp=/)
                     addr = e.split("bp=").last
                     o.addr = addr.gsub(/[\s\n]+/, "")

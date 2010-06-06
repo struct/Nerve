@@ -131,7 +131,7 @@ class Nerve
 
     def set_breakpoints
         @bps.each do |o|
-            output_str("Setting breakpoint: [#{o.addr},#{o.name} #{o.lib}]")
+            output_str("Setting breakpoint: [#{o.addr}, #{o.name} #{o.lib}]")
             
             case
                 when RUBY_PLATFORM =~ /win(dows|32)/i
@@ -151,9 +151,9 @@ class Nerve
 
     def analyze(o)
         output_hit(o.addr, o.name)
-        o.hits += 1
+        o.hits = o.hits.to_i + 1
 
-        if o.hits > o.bpc
+        if o.hits.to_i > o.bpc.to_i
             o.flag = false
             ## XXX Uninstall this breakpoint!
         end

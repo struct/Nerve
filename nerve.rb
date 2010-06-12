@@ -42,7 +42,7 @@ class Nerve
 
                 parse_breakpoint_file(bp_file)
 
-                if @pid.kind_of? String
+                if @pid.kind_of?(String) && @pid.to_i == 0
                     @rw = NerveWin32.find_by_regex(/#{@pid}/)
                 else
                     @rw = NerveWin32.new(@pid.to_i)
@@ -62,7 +62,7 @@ class Nerve
 
             when RUBY_PLATFORM =~ /linux/i
 
-                if @pid.kind_of? String
+                if @pid.kind_of?(String) && @pid.to_i == 0
                     @pid = NerveLinux.find_by_regex(/#{@pid}/)
                 else
                     @pid = @pid.to_i
@@ -75,13 +75,20 @@ class Nerve
 
                 @threads = NerveLinux.threads(@pid)
                 self.which_threads
-                @rw = NerveLinux.new(@pid)
+
+                opts = {}
+
+                if NERVE_OPTS[:fork] == true
+                    opts[:fork] = true
+                end
+
+                @rw = NerveLinux.new(@pid, opts)
 
             when RUBY_PLATFORM =~ /darwin/i
 
                 parse_breakpoint_file(bp_file)
 
-                if @pid.kind_of? String
+                if @pid.kind_of?(String) && @pid.to_i.nil?
                     @pid = NerveOSX.find_by_regex(/#{@pid}/)
                 else
                     @pid = @pid.to_i
@@ -106,6 +113,11 @@ class Nerve
 
         if RUBY_PLATFORM !~ /win(dows|32)/i
             @rw.install_bps
+
+            if NERVE_OPTS[:fork] == true && RUBY_PLATFORM =~ /linux/i
+                @rw.set_options(Ragweed::Wraptux::Ptrace::SetOptions::TRACEFORK)
+            end
+
             @rw.continue
         end
 
@@ -131,7 +143,7 @@ class Nerve
 
     def set_breakpoints
         @bps.each do |o|
-            output_str("Setting breakpoint: [#{o.addr}, #{o.name} #{o.lib}]")
+            output_str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
             
             case
                 when RUBY_PLATFORM =~ /win(dows|32)/i
@@ -165,7 +177,7 @@ class Nerve
     ## better way of handling interrupts so we
     ## dont have to duplicate this method!
     def dump_stats
-        puts "Dumping stats"
+        puts "Dumping breakpoint stats ..."
         @bps.each do |o|
             if o.addr != 0
                 puts "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
@@ -177,7 +189,8 @@ end
 NERVE_OPTS = {
     :pid => 0,
     :bp_file => nil,
-    :out => STDOUT
+    :out => STDOUT,
+    :fork => false
 }
 
 opts = OptionParser.new do |opts|
@@ -193,6 +206,10 @@ opts = OptionParser.new do |opts|
 
     opts.on("-o", "--output FILE", "Dump all output to a file\n\n") do |o|
         NERVE_OPTS[:out] = File.open(o, "w") rescue (bail $!)
+    end
+
+    opts.on("-f", "", "Flag indicates whether or not to trace forked child processes (Linux only)") do |o|
+        NERVE_OPTS[:fork] = true
     end
 end
 

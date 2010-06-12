@@ -6,7 +6,7 @@ case
 when RUBY_PLATFORM =~ /win(dows|32)/i
     class NerveWin32 < Ragweed::Debugger32
         def initialize(pid)
-#            @pid = pid
+            @pid = pid
             super
         end
 
@@ -38,7 +38,8 @@ when RUBY_PLATFORM =~ /win(dows|32)/i
 
 when RUBY_PLATFORM =~ /linux/i
     class NerveLinux < Ragweed::Debuggertux
-        def initialize(pid)
+        def initialize(pid, opts)
+            @pid = pid
             super
         end
 
@@ -52,6 +53,10 @@ when RUBY_PLATFORM =~ /linux/i
             end
         end
 
+        def on_fork_child(pid)
+            @pid = pid
+        end
+
         def on_sigterm
             puts "Process Terminated!"
             self.print_regs
@@ -61,7 +66,7 @@ when RUBY_PLATFORM =~ /linux/i
     
         def on_segv
             puts "Segmentation Fault!"
-            self.print_regs
+            self.print_registers
             dump_stats
             exit
         end
@@ -74,6 +79,7 @@ when RUBY_PLATFORM =~ /linux/i
 when RUBY_PLATFORM =~ /darwin/i
     class NerveOSX < Ragweed::Debuggerosx
         def initialize(pid)
+            @pid = pid
             super
         end
 

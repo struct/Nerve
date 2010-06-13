@@ -180,7 +180,7 @@ class Nerve
         puts "Dumping breakpoint stats ..."
         @bps.each do |o|
             if o.addr != 0
-                puts "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
+                output_str("#{o.addr} - #{o.name} | #{o.hits} hit(s)")
             end
         end
     end
@@ -194,7 +194,7 @@ NERVE_OPTS = {
 }
 
 opts = OptionParser.new do |opts|
-    opts.banner = "\nRagweed Nerve 1.0 (Use -h for help)\n\n"
+    opts.banner = "\nRagweed Nerve 1.1 (Use -h for help)\n\n"
 
     opts.on("-p", "--pid PID/Name", "Attach to this pid OR process name (ex: -p 12345 | -p gcalctool)") do |o|
         NERVE_OPTS[:pid] = o
@@ -204,11 +204,11 @@ opts = OptionParser.new do |opts|
         NERVE_OPTS[:bp_file] = o
     end
 
-    opts.on("-o", "--output FILE", "Dump all output to a file\n\n") do |o|
+    opts.on("-o", "--output FILE", "Dump all output to a file") do |o|
         NERVE_OPTS[:out] = File.open(o, "w") rescue (bail $!)
     end
 
-    opts.on("-f", "", "Flag indicates whether or not to trace forked child processes (Linux only)") do |o|
+    opts.on("-f", "Optional flag indicates whether or not to trace forked child processes (Linux only)\n\n") do |o|
         NERVE_OPTS[:fork] = true
     end
 end

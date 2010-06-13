@@ -48,12 +48,14 @@
 
 ## Usage
 
-    Ragweed Nerve 1.0
+    $ ruby nerve.rb -h
 
-    -p The pid OR name of the process you want to trace
-    -b The breakpoint file
-    -o Optional output file for raw tracing data
+    Ragweed Nerve 1.1 (Use -h for help)
 
+    -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool)
+    -b, --breakpoint_file FILE       Read all breakpoints from this file
+    -o, --output FILE                Dump all output to a file
+    -f                               Optional flag indicates whether or not to trace forked child processes (Linux only)
 
     Yes, it 'Just Works'! If you want to write more complex tools then I encourage you to look
     at the ragweed library, or extend Nerve's signal handlers with your own methods.
@@ -132,5 +134,3 @@
 Nerve was written by Chris Rohlf, and is also developed by Alex Rad
 
 Ragweed was written by Thomas Ptacek, ported to OSX by Timur Duehr and ported to Linux by Chris Rohlf
-
-

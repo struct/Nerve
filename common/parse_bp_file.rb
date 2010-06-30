@@ -34,6 +34,13 @@ class Nerve
                     o.bpc = bpc.to_i
                 end
 
+                if e.match(/code=/)
+                    code = e.split("code=").last
+                    c = code.gsub(/[\s\n]+/, "")
+                    r = File.read(c)
+                    o.code = r
+                end
+
                 if e.match(/lib=/)
                     lib = e.split("lib=").last
                     o.lib = lib.gsub(/[\s\n]+/, "")

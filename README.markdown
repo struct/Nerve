@@ -64,7 +64,7 @@
 
     Win32 Breakpoint Configuration
     break=<Address or Function!Library>, name=<Function Name>, bpc=<Breakpoint Count (Optional)>
-    break=0x12345678, name=SomeFunction, bpc=2
+    break=0x12345678, name=SomeFunction, bpc=2, code=scripts/SomeFunctionAnalysis.rb
     break=kernel32!CreateFileW, name=SomeFunction
 
     Linux Breakpoint Configuration

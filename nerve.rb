@@ -153,10 +153,15 @@ class Nerve
                                 #puts @rw.process.read(args[i],512).from_utf16_buffer
                             end
                         end
+
+                        if !o.code.nil?
+                            eval(o.code)
+                        end
+
                         analyze(o)
                     end
                 when RUBY_PLATFORM =~ /linux/i, RUBY_PLATFORM =~ /darwin/i
-                    @rw.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do analyze(o); end))
+                    @rw.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do eval(o.code); analyze(o); end))
             end
         end
     end
@@ -208,9 +213,17 @@ opts = OptionParser.new do |opts|
         NERVE_OPTS[:out] = File.open(o, "w") rescue (bail $!)
     end
 
-    opts.on("-f", "Optional flag indicates whether or not to trace forked child processes (Linux only)\n\n") do |o|
-        NERVE_OPTS[:fork] = true
+    if RUBY_PLATFORM =~ /linux/i
+        opts.on("-f", "Optional flag indicates whether or not to trace forked child processes (Linux only)\n\n") do |o|
+            NERVE_OPTS[:fork] = true
+        end
     end
+end
+
+class String
+  def to_proc
+    eval "Proc.new { |*args| args.first#{self} }"
+  end
 end
 
 opts.parse!(ARGV) rescue (STDERR.puts $!; exit 1)

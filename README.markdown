@@ -62,15 +62,23 @@
 
 ## Breakpoint File Example
 
+    Keywords in breakpoint files:
+
+    break - An address (or a symbolic name in the case of Win32) where the debugger should set a breakpoint
+    name - A name describing the breakpoint, typically a symbol or function name
+    lib - An optional library name indicating where the symbol can be found
+    bpc - Number of times to let this breakpoint hit
+    code - Location of a script that holds ruby code to be executed when this breakpoint hits    
+
+    --
+
     Win32 Breakpoint Configuration
-    break=<Address or Function!Library>, name=<Function Name>, bpc=<Breakpoint Count (Optional)>
     break=0x12345678, name=SomeFunction, bpc=2, code=scripts/SomeFunctionAnalysis.rb
-    break=kernel32!CreateFileW, name=SomeFunction
+    break=kernel32!CreateFileW, name=CreateFileW, code=scripts/CreateFileW_Analysis.rb
 
     Linux Breakpoint Configuration
-    break=<Address>, name=<Function Name>, lib=<LibraryName (optional)>, bpc=<Breakpoint Count (Optional)>
-    break=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1
-    break=0x12345678, name=function_name
+    break=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1, code=scripts/ncurses_trace.rb
+    name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40 code=scripts/malloc_linux.rb
 
     OS X  Breakpoint Configuration: 
     break=<Address>, name=<Function Name>, bpc=<Breakpoint Count (Optional)>
@@ -78,8 +86,7 @@
 
 ## Examples
 
-    Heres some example output from Nerve. Please keep in mind the tool is merely a shell
-    and it will grow as Ragweed matures.
+    Heres some example output from Nerve.
 
     chris@ubuntu:/# ruby nerve.rb -b example_breakpoint_files/generic_ubuntu_910_libc_trace.txt -p test
     Nerve ...

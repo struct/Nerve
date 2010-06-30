@@ -98,36 +98,84 @@
     0x0185010 hit 0 times
     ... Done!
 
-    Nerve running on Windows XP and debugging notepad.exe:
+    Nerve running on Windows 7 and debugging an example program that calls HeapAlloc. For this test
+    program we want to run a simple ruby script each time HeapAlloc is entered and exited.
 
-    PS Z:\Nerve> ruby nerve.rb -b example_breakpoint_files\Win32_notepad.txt -p notepad.exe
+    Test Program:
+
+    ...
+    #include <stdio.h>
+    #include <windows.h>
+
+    int main(int argc, char *argv[])
+    {
+       void *a;
+       HANDLE h1 = HeapCreate(0, 1024, 1024);
+       int i = atol(argv[1]);
+
+       while(1)
+       {
+           a = HeapAlloc(h1, HEAP_ZERO_MEMORY, i);
+           HeapFree(h1, 0, a);
+       }
+
+        return 0;
+    }
+    ...
+
+    Here is the breakpoint configuration file:
+
+    ...
+    bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/malloc.rb
+    ...
+
+    And here is the scripts/malloc.rb referenced in the breakpoint config file:
+
+    ...
+    ## This script is for Win32 RtlAllocateHeap
+
+    if dir.to_s =~ /enter/
+        puts "Size requested #{@rw.process.read32(ctx.esp+12)}"
+        puts "Heap handle is @ #{@rw.process.read32(ctx.esp+4).to_s(16)}"
+    else
+        puts "Heap chunk returned @ #{ctx.eax.to_s(16)}"
+    end
+    ...
+
+    Below is the output of hooking the malloc.exe program:
+
+    PS C:\My Dropbox\Nerve> ruby .\nerve.rb -p malloc.exe -b .\example_breakpoint_files\Win32_notepad.txt
     Nerve ...
-    Setting breakpoint: [kernel32!ReadFile,ReadFile]
-    Setting breakpoint: [kernel32!WriteFile,WriteFile]
-    Setting breakpoint: [kernel32!CreateFileW,CreateFileW]
-    Setting breakpoint: [kernel32!DeviceIoControl,DeviceIOControl]
-    Pid is 3440
-    Tid is 3496
+    Setting breakpoint: [ ntdll!RtlAllocateHeap, RtlAllocateHeap ]
+    Size requested 1024
+    Heap handle is @ 750000
+    Heap chunk returned @ 750590
+    Size requested 1024
+    Heap handle is @ 750000
+    Heap chunk returned @ 750590
+    Size requested 1024
+    Heap handle is @ 750000
+    Heap chunk returned @ 750590                    <- This is where I CTRL+C the test program
+    Size requested 24
+    Heap handle is @ 470000
+    Heap chunk returned @ 47f640
     -----------------------------------------------------------------------
     CONTEXT:
-    EIP: 7c90e514
+    EIP: 77b564f4
 
     EAX: 000000c0
-    EBX: 00000000
-    ECX: 01020228
-    EDX: 010201d8
-    EDI: 7c97e440
-    ESI: 7c97e420
-    EBP: 00e8ffb4
-    ESP: 00e8ff70
-    EFL: 00000000000000000000001010000110 cvvavrxniiodItSzxaxPXc
-
+    EBX: 7ffd3000
+    ECX: 77b6350f
+    EDX: 00000000
+    EDI: 00000000
+    ESI: 002af704
+    EBP: 002af728
+    ESP: 002af6c0
+    EFL: 00000000000000000000001000000010 cvvavrxniiodItszxaxpXc
     Dumping stats
-    kernel32!ReadFile - 82 hit(s)
-    kernel32!WriteFile - 0 hit(s)
-    kernel32!CreateFileW - 122 hit(s)
-    kernel32!DeviceIoControl - 90 hit(s)
-
+    Pid is 3224
+    Tid is 4048
+    ntdll!RtlAllocateHeap - RtlAllocateHeap | 4 hit(s)
 
 ## Who
 

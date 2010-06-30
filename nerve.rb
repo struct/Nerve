@@ -147,18 +147,21 @@ class Nerve
             
             case
                 when RUBY_PLATFORM =~ /win(dows|32)/i
-                    @rw.hook(o.addr, o.name) do |evt, ctx, loc, args|
+                    @rw.hook(o.addr, o.name) do |evt, ctx, dir, args|
                         if !args.nil?
                             0.upto(args.size) do |i|
                                 #puts @rw.process.read(args[i],512).from_utf16_buffer
                             end
                         end
 
+                        ## Call the ruby code associated with this breakpoint
                         if !o.code.nil?
                             eval(o.code)
                         end
 
-                        analyze(o)
+                        if dir.to_s =~ /enter/
+                            analyze(o)
+                        end
                     end
                 when RUBY_PLATFORM =~ /linux/i, RUBY_PLATFORM =~ /darwin/i
                     @rw.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do eval(o.code); analyze(o); end))

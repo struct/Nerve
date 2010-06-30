@@ -1,5 +1,6 @@
 ; Example notepad.exe breakpoint file
 
+bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/malloc.rb
 bp=kernel32!CreateFileA, name=CreateFileA, bpc=1
 bp=kernel32!DeviceIoControl, name=DeviceIOControl, bpc=3
 bp=kernel32!ReadFile, name=ReadFile

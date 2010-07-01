@@ -133,7 +133,7 @@
     Here is the breakpoint configuration file:
 
     ...
-    bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/malloc.rb
+    bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/RtlAllocateHeap.rb
     ...
 
     And here is the scripts/malloc.rb referenced in the breakpoint config file:

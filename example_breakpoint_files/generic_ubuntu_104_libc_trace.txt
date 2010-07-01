@@ -2,7 +2,7 @@
 ; You can use 'readelf -s' to get the proper address for
 ; a function inside of your shared object.
 ; The order of the parameters does not matter
-name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40 code=scripts/malloc.rb
+name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40, code=scripts/glibc_malloc.rb
 bp=0x08055590, name=mp_add, bpc=10
 bp=0x007c830, name=wmemcpy, lib=/lib/tls/i686/cmov/libc-2.11.1.so
 bp=0x0074f20, name=memcpy, lib=/lib/tls/i686/cmov/libc-2.11.1.so

@@ -164,7 +164,14 @@ class Nerve
                         end
                     end
                 when RUBY_PLATFORM =~ /linux/i, RUBY_PLATFORM =~ /darwin/i
-                    @rw.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do eval(o.code); analyze(o); end))
+                    @rw.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do 
+                            if !o.code.nil?
+                                eval(o.code)
+                            end
+
+                            analyze(o)
+                        end
+                    ))
             end
         end
     end

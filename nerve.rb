@@ -147,13 +147,7 @@ class Nerve
             
             case
                 when RUBY_PLATFORM =~ /win(dows|32)/i
-                    @rw.hook(o.addr, o.name) do |evt, ctx, dir, args|
-                        if !args.nil?
-                            0.upto(args.size) do |i|
-                                #output_str(@rw.process.read(args[i],512).from_utf16_buffer)
-                            end
-                        end
-
+                    @rw.hook(o.addr, 0) do |evt, ctx, dir, args|
                         ## Call the ruby code associated with this breakpoint
                         if !o.code.nil?
                             eval(o.code)

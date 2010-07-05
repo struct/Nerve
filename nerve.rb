@@ -56,7 +56,7 @@ class Nerve
 
                 if !@threads.nil?
                     @threads.each do |x|
-                        #puts "#{x.th32OwnerProcessID} => #{x.th32ThreadID}"
+                        #output_str("#{x.th32OwnerProcessID} => #{x.th32ThreadID})"
                     end 
                 end
 
@@ -150,7 +150,7 @@ class Nerve
                     @rw.hook(o.addr, o.name) do |evt, ctx, dir, args|
                         if !args.nil?
                             0.upto(args.size) do |i|
-                                #puts @rw.process.read(args[i],512).from_utf16_buffer
+                                #output_str(@rw.process.read(args[i],512).from_utf16_buffer)
                             end
                         end
 
@@ -168,6 +168,7 @@ class Nerve
                             ## XXX breakpoint_clear !?
                             ## This needs to be cleaned up in ragweed
                             @rw.breakpoint_clear(ctx.eip-1)
+                            output_str("(Breakpoint #{o.name} cleared!)")
                         end
                     end
 
@@ -198,11 +199,13 @@ class Nerve
 
     ## We still want to dump stats if we Ctrl+C
     ## Note: this method is different then the
-    ## one in handlers.rb for Win32. I need a
-    ## better way of handling interrupts so we
-    ## dont have to duplicate this method!
+    ## one in handlers.rb for Win32. Fortunately
+    ## there is also a on_exit_process which will
+    ## dump the context for us.
+    ## We need a better way of handling interrupts
+    ## so we dont have to duplicate this method!
     def dump_stats
-        puts "Dumping breakpoint stats ..."
+        output_str("Dumping breakpoint stats ...")
         @bps.each do |o|
             if o.addr != 0
                 output_str("#{o.addr} - #{o.name} | #{o.hits} hit(s)")

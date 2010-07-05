@@ -30,7 +30,9 @@
 
 	Nerve is a simple tool, but we plan to grow it ...
 
+    - Helper methods and better named instance variables for making breakpoint scripts easier to write
     - Better output such as graphviz, statistics, function arguments etc...
+    - An HTML5 canvas output mode
 	- A basic RubyWX GUI (this will be optional)
 	- Redis database support (this will be optional)
     - Nerve is helping us find the areas of Ragweed that need the most improvement
@@ -63,26 +65,27 @@
 ## Breakpoint File Example
 
     Keywords in breakpoint files:
+    (order does not matter)
 
-    break - An address (or a symbolic name in the case of Win32) where the debugger should set a breakpoint
+    bp - An address (or a symbolic name in the case of Win32) where the debugger should set a breakpoint
     name - A name describing the breakpoint, typically a symbol or function name
-    lib - An optional library name indicating where the symbol can be found
-    bpc - Number of times to let this breakpoint hit
+    lib - An optional library name indicating where the symbol can be found, only useful with Linux/OSX
+    bpc - Number of times to let this breakpoint hit before uninstalling it
     code - Location of a script that holds ruby code to be executed when this breakpoint hits    
 
     --
 
-    Win32 Breakpoint Configuration
-    break=0x12345678, name=SomeFunction, bpc=2, code=scripts/SomeFunctionAnalysis.rb
-    break=kernel32!CreateFileW, name=CreateFileW, code=scripts/CreateFileW_Analysis.rb
+    Win32 Breakpoint Configuration:
+    bp=0x12345678, name=SomeFunction, bpc=2, code=scripts/SomeFunctionAnalysis.rb
+    bp=kernel32!CreateFileW, name=CreateFileW, code=scripts/CreateFileW_Analysis.rb
 
-    Linux Breakpoint Configuration
-    break=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1, code=scripts/ncurses_trace.rb
+    Linux Breakpoint Configuration:
+    bp=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1, code=scripts/ncurses_trace.rb
     name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40 code=scripts/malloc_linux.rb
 
-    OS X  Breakpoint Configuration: 
-    break=<Address>, name=<Function Name>, bpc=<Breakpoint Count (Optional)>
-    break=0x12345678, name=function_name, bpc=6
+    OS X  Breakpoint Configuration:
+    bp=<Address>, name=<Function Name>, bpc=2
+    bp=0x12345678, name=function_name, bpc=6
 
 ## Examples
 

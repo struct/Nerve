@@ -162,16 +162,31 @@ class Nerve
                         if dir.to_s =~ /enter/
                             analyze(o)
                         end
+
+                        if o.hits.to_i > o.bpc.to_i
+                            o.flag = false
+                            ## XXX breakpoint_clear !?
+                            ## This needs to be cleaned up in ragweed
+                            @rw.breakpoint_clear(ctx.eip-1)
+                        end
                     end
+
                 when RUBY_PLATFORM =~ /linux/i, RUBY_PLATFORM =~ /darwin/i
                     @rw.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do 
-                            if !o.code.nil?
-                                eval(o.code)
-                            end
-
-                            analyze(o)
+                        if !o.code.nil?
+                            eval(o.code)
                         end
-                    ))
+
+                        analyze(o)
+
+                        if o.hits.to_i > o.bpc.to_i
+                            o.flag = false
+                            r = @rw.get_registers
+                            ## XXX breakpoint_clear !?
+                            ## This needs to be cleaned up in ragweed
+                            #@rw.breakpoint_clear(r[:eip]-1)
+                        end
+                    end ))
             end
         end
     end
@@ -179,11 +194,6 @@ class Nerve
     def analyze(o)
         output_hit(o.addr, o.name)
         o.hits = o.hits.to_i + 1
-
-        if o.hits.to_i > o.bpc.to_i
-            o.flag = false
-            ## XXX Uninstall this breakpoint!
-        end
     end
 
     ## We still want to dump stats if we Ctrl+C

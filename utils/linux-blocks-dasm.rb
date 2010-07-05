@@ -104,7 +104,7 @@ for sym in d.symbols
 end
 
 bps.each do |b|
-  out = "break=#{b[0].to_hex}, name="
+  out = "bp=#{b[0].to_hex}, name="
   if x.include? b[0]
     out += "#{x[b[0]]}"
   else

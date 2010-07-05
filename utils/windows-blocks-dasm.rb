@@ -96,7 +96,7 @@ end
 
 
 bps.each do |b|
-  out = "break=#{b[0].to_hex}, name="
+  out = "bp=#{b[0].to_hex}, name="
   out += "#{b[1]}"
   puts out
 end

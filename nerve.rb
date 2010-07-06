@@ -27,6 +27,7 @@ require 'ostruct'
 require 'common/parse_bp_file'
 require 'common/output'
 require 'common/common'
+require 'common/constants'
 
 class Nerve
     attr_accessor :pid, :threads, :bps, :so, :out, :stats
@@ -38,7 +39,7 @@ class Nerve
         @out = NERVE_OPTS[:out]
 
         case
-            when RUBY_PLATFORM =~ /win(dows|32)/i
+            when RUBY_PLATFORM =~ WINDOWS_OS
 
                 parse_breakpoint_file(bp_file)
 
@@ -60,7 +61,7 @@ class Nerve
                     end 
                 end
 
-            when RUBY_PLATFORM =~ /linux/i
+            when RUBY_PLATFORM =~ LINUX_OS
 
                 if @pid.kind_of?(String) && @pid.to_i == 0
                     @pid = NerveLinux.find_by_regex(/#{@pid}/)
@@ -84,7 +85,7 @@ class Nerve
 
                 @rw = NerveLinux.new(@pid, opts)
 
-            when RUBY_PLATFORM =~ /darwin/i
+            when RUBY_PLATFORM =~ OSX_OS
 
                 parse_breakpoint_file(bp_file)
 
@@ -105,16 +106,16 @@ class Nerve
 
         self.output_init
 
-        @rw.attach if RUBY_PLATFORM !~ /win(dows|32)/i
+        @rw.attach if RUBY_PLATFORM !~ WINDOWS_OS
 
         self.set_breakpoints
 
         @rw.save_bps(@bps)
 
-        if RUBY_PLATFORM !~ /win(dows|32)/i
+        if RUBY_PLATFORM !~ WINDOWS_OS
             @rw.install_bps
 
-            if NERVE_OPTS[:fork] == true && RUBY_PLATFORM =~ /linux/i
+            if NERVE_OPTS[:fork] == true && RUBY_PLATFORM =~ LINUX_OS
                 @rw.set_options(Ragweed::Wraptux::Ptrace::SetOptions::TRACEFORK)
             end
 
@@ -122,7 +123,7 @@ class Nerve
         end
 
         trap("INT") do
-            @rw.uninstall_bps if RUBY_PLATFORM !~ /win(dows|32)/i
+            @rw.uninstall_bps if RUBY_PLATFORM !~ WINDOWS_OS
             dump_stats
             output_finalize
             exit
@@ -146,7 +147,7 @@ class Nerve
             output_str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
             
             case
-                when RUBY_PLATFORM =~ /win(dows|32)/i
+                when RUBY_PLATFORM =~ WINDOWS_OS
                     @rw.hook(o.addr, 0) do |evt, ctx, dir, args|
                         ## Call the ruby code associated with this breakpoint
                         if !o.code.nil?
@@ -166,7 +167,7 @@ class Nerve
                         end
                     end
 
-                when RUBY_PLATFORM =~ /linux/i, RUBY_PLATFORM =~ /darwin/i
+                when RUBY_PLATFORM =~ LINUX_OS, RUBY_PLATFORM =~ OSX_OS
                     @rw.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do 
                         if !o.code.nil?
                             eval(o.code)
@@ -230,7 +231,7 @@ opts = OptionParser.new do |opts|
         NERVE_OPTS[:out] = File.open(o, "w") rescue (bail $!)
     end
 
-    if RUBY_PLATFORM =~ /linux/i
+    if RUBY_PLATFORM =~ LINUX_OS
         opts.on("-f", "Optional flag indicates whether or not to trace forked child processes (Linux only)\n\n") do |o|
             NERVE_OPTS[:fork] = true
         end

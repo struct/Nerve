@@ -2,8 +2,10 @@
 ## Ragweed signal handlers. Please see the Ragweed
 ## code to see what you should name them!
 
+require 'common/constants'
+
 case
-when RUBY_PLATFORM =~ /win(dows|32)/i
+when RUBY_PLATFORM =~ WINDOWS_OS
     class NerveWin32 < Ragweed::Debugger32
         def initialize(pid)
             @pid = pid
@@ -36,7 +38,7 @@ when RUBY_PLATFORM =~ /win(dows|32)/i
         end
     end
 
-when RUBY_PLATFORM =~ /linux/i
+when RUBY_PLATFORM =~ LINUX_OS
     class NerveLinux < Ragweed::Debuggertux
         def initialize(pid, opts)
             @pid = pid
@@ -76,7 +78,7 @@ when RUBY_PLATFORM =~ /linux/i
         end
     end
 
-when RUBY_PLATFORM =~ /darwin/i
+when RUBY_PLATFORM =~ OSX_OS
     class NerveOSX < Ragweed::Debuggerosx
         def initialize(pid)
             @pid = pid

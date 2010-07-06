@@ -13,6 +13,7 @@ class Nerve
             o.base = 0
 			o.flag = true
 			o.hits = 0
+            o.bpc = 0
 
             r = tl.split(",")
 

@@ -1,8 +1,8 @@
 ; Example notepad.exe breakpoint file
+; Tested on Win 7
 
-bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/RtlAllocateHeap.rb
+bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/RtlAllocateHeap.rb, bpc=10
 bp=kernel32!CreateFileA, name=CreateFileA, bpc=1
 bp=kernel32!DeviceIoControl, name=DeviceIOControl, bpc=3
 bp=kernel32!ReadFile, name=ReadFile
 bp=kernel32!WriteFile, name=WriteFile
-

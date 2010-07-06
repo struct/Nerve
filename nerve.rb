@@ -217,7 +217,7 @@ NERVE_OPTS = {
 }
 
 opts = OptionParser.new do |opts|
-    opts.banner = "\nRagweed Nerve 1.1 (Use -h for help)\n\n"
+    opts.banner = "\nRagweed Nerve 1.2 (Use -h for help)\n\n"
 
     opts.on("-p", "--pid PID/Name", "Attach to this pid OR process name (ex: -p 12345 | -p gcalctool)") do |o|
         NERVE_OPTS[:pid] = o

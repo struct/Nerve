@@ -158,7 +158,7 @@ class Nerve
                             analyze(o)
                         end
 
-                        if o.hits.to_i > o.bpc.to_i
+                        if o.hits.to_i > o.bpc.to_i and !o.bpc.nil?
                             o.flag = false
                             ## XXX breakpoint_clear !?
                             ## This needs to be cleaned up in ragweed
@@ -238,12 +238,6 @@ opts = OptionParser.new do |opts|
     end
 end
 
-class String
-  def to_proc
-    eval "Proc.new { |*args| args.first#{self} }"
-  end
-end
-
 opts.parse!(ARGV) rescue (STDERR.puts $!; exit 1)
 
 if NERVE_OPTS[:pid] == nil || NERVE_OPTS[:bp_file] == nil
@@ -251,6 +245,8 @@ if NERVE_OPTS[:pid] == nil || NERVE_OPTS[:bp_file] == nil
     exit
 end
 
-begin
+## Never is still under heavy development
+## we want to see gross errors for now
+#begin
     w = Nerve.new(NERVE_OPTS[:pid], NERVE_OPTS[:bp_file])
-rescue; end
+#rescue; end

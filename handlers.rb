@@ -32,7 +32,7 @@ when RUBY_PLATFORM =~ WINDOWS_OS
             super
         end
 
-        def on_access_violation
+        def on_access_violation(ev)
             dump_stats(ev)
             puts "Access violation!"
         end

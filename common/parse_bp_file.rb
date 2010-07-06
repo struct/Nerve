@@ -13,7 +13,7 @@ class Nerve
             o.base = 0
 			o.flag = true
 			o.hits = 0
-            o.bpc = 0
+            o.bpc = nil
 
             r = tl.split(",")
 
@@ -48,7 +48,7 @@ class Nerve
 
                     ## TODO - addr must already be parsed
                     ## for this to work correctly
-                    if RUBY_PLATFORM =~ /linux/i
+                    if RUBY_PLATFORM =~ LINUX_OS
                         @so.each_pair do |k,v|
                             if v =~ /#{o.lib}/
                                 o.base = k

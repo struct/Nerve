@@ -1,23 +1,13 @@
 #!/usr/bin/env ruby
 
-## Nerve is a ragweed based, cross platform code tracer. Nerve takes a breakpoint
-## file with the following format:
+## Nerve is a cross platform debugger designed for security researchers. It
+## is based on Ragweed (http://github.com/tduehr/ragweed)
 ##
-## Win32 Breakpoint Configuration
-## break=<Address or Function!Library>, name=<Function Name>, bpc=<Breakpoint Count (Optional)>
-## break=0x12345678, name=SomeFunction, bpc=2
-## break=kernel32!CreateFileW, name=SomeFunction
+## Please refer to the README file for more information
 ##
-## Linux Breakpoint Configuration
-## break=<Address>, name=<Function Name>, lib=<LibraryName (optional)>, bpc=<Breakpoint Count (Optional)>
-## break=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1
-## break=0x12345678, name=function_name
-##
-## OS X  Breakpoint Configuration: 
-## break=<Address>, name=<Function Name>, bpc=<Breakpoint Count (Optional)>
-## break=0x12345678, name=function_name, bpc=6
-##
+## Nerve is developed by:
 ## Chris @ Matasano.com
+## AlexRad
 
 require 'rubygems'
 require 'ragweed'
@@ -38,6 +28,8 @@ class Nerve
         @threads = Array.new
         @out = NERVE_OPTS[:out]
 
+        self.log_init
+
         case
             when RUBY_PLATFORM =~ WINDOWS_OS
 
@@ -57,7 +49,7 @@ class Nerve
 
                 if !@threads.nil?
                     @threads.each do |x|
-                        #output_str("#{x.th32OwnerProcessID} => #{x.th32ThreadID})"
+                        #log_str("#{x.th32OwnerProcessID} => #{x.th32ThreadID})"
                     end 
                 end
 
@@ -104,8 +96,6 @@ class Nerve
 
         @rw.save_threads(@threads)
 
-        self.output_init
-
         @rw.attach if RUBY_PLATFORM !~ WINDOWS_OS
 
         self.set_breakpoints
@@ -125,7 +115,7 @@ class Nerve
         trap("INT") do
             @rw.uninstall_bps if RUBY_PLATFORM !~ WINDOWS_OS
             dump_stats
-            output_finalize
+            log_finalize
             exit
         end
 
@@ -144,7 +134,7 @@ class Nerve
 
     def set_breakpoints
         @bps.each do |o|
-            output_str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
+            log_str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
             
             case
                 when RUBY_PLATFORM =~ WINDOWS_OS
@@ -163,7 +153,7 @@ class Nerve
                             ## XXX breakpoint_clear !?
                             ## This needs to be cleaned up in ragweed
                             @rw.breakpoint_clear(ctx.eip-1)
-                            output_str("(Breakpoint #{o.name} cleared!)")
+                            log_str("(Breakpoint #{o.name} cleared!)")
                         end
                     end
 
@@ -188,7 +178,7 @@ class Nerve
     end
 
     def analyze(o)
-        output_hit(o.addr, o.name)
+        log_hit(o.addr, o.name)
         o.hits = o.hits.to_i + 1
     end
 
@@ -200,10 +190,10 @@ class Nerve
     ## We need a better way of handling interrupts
     ## so we dont have to duplicate this method!
     def dump_stats
-        output_str("Dumping breakpoint stats ...")
+        log_str("Dumping breakpoint stats ...")
         @bps.each do |o|
             if o.addr != 0
-                output_str("#{o.addr} - #{o.name} | #{o.hits} hit(s)")
+                log_str("#{o.addr} - #{o.name} | #{o.hits} hit(s)")
             end
         end
     end

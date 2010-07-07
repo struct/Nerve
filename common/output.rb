@@ -2,20 +2,19 @@
 ## Nothing here yet!
 
 class Nerve
-    def output_init
+    def log_init
         @out.puts "Nerve ..."
     end
 
-    def output_finalize
-        @out.puts "... Done!"
-    end
-
-    def output_str(str)
+    def log_str(str)
         @out.puts str
     end
 
-    def output_hit(addr, function_name)
-        ## Uncomment this line to see output for each hit
-        #@out.puts "[ #{addr} #{function_name} ]"
+    def log_hit(addr, function_name)
+        @out.puts "[ #{addr} #{function_name} ]"
+    end
+
+    def log_finalize
+        @out.puts "... Nerve is done!"
     end
 end

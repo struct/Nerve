@@ -7,34 +7,47 @@
     To learn more about Ragweed, read this:
     http://chargen.matasano.com/chargen/2009/8/27/ruby-for-pentesters-the-dark-side-i-ragweed.html
 
-    Nerve is a dynamic tracing tool for native x86 code. I wrote it specifically to get
-    an idea of how much code coverage my fuzzers were getting. It has other uses as a basic
-    dynamic hit tracer as well.
+    Nerve is a dynamic tracing tool for native x86 code.
 
     Nerve showcases the best part about Ragweed: cross platform debugging. I originally
     wrote Nerve as a small Ragweed script that kept stats on the functions my fuzzers
-    were triggering in my target process. This helped me gauge what code paths my fuzzer was
+    were triggering in my target process. This let me know what code paths my fuzzer was
     reaching and which ones it wasn't. It only took a few hours to make it work on all Ragweed
-    supported platforms, and since then I have used it more than once. Hopefully the code
-    will help other people write better Ragweed tools. I do plan to keep Nerve updated with
-    newer features such as better output. I have some utility scripts on the way that help
-    generate the breakpoint files required by Nerve, but for now you will have to build them
-    by hand.
+    supported platforms, and since then it has grown into a better tool. It now supports
+    breakpoint configuration files, ruby scripts per breakpoint and more.
+
+## Supported Platforms
+
+    Nerve is supported and has been tested on the following platforms:
+
+    Windows 7
+    Windows XP
+    Linux Ubuntu 10.4
+    Linux Ubuntu 9.10
+    Mac OS X 10.6
+    Mac OS X 10.5
+
+    At this time only Ruby 1.8.x has been tested. We are actively investigating both 64 bit
+    support for each platform and support for Ruby 1.9.x. Unfortunately both of these things
+    require changes to Ragweed.
 
 ## Features
 
-    - Cross platform. It works on Win32 (XP SP2/SP3, Win7), Linux (Ubuntu) and OSX
-    - Easy breakpoint configuration via simple csv text files
+    - Cross platform (see above)
+    - Easy breakpoint configuration files you can write by hand or generate using our tools
+    - Run Ruby scripts with full access to the debugger when breakpoints are hit
+    - Extend Nerve with your own event handling methods in handlers.rb
+    - Extend Nerves output with your own methods in common/output.rb
 
 ## Todo
 
-	Nerve is a simple tool, but we plan to grow it ...
+	Nerve is a simple tool, but we plan to grow it with optional add ons:
 
     - Helper methods and better named instance variables for making breakpoint scripts easier to write
     - Better output such as graphviz, statistics, function arguments etc...
     - An HTML5 canvas output mode
-	- A basic RubyWX GUI (this will be optional)
-	- Redis database support (this will be optional)
+	- A basic RubyWX GUI
+	- Redis database support
     - Nerve is helping us find the areas of Ragweed that need the most improvement
   
 ## Requirements
@@ -48,11 +61,15 @@
 
     YES thats it!
 
+    If you want to run the bleeding edge stuff we commit to github everyday then I suggest
+    checking out the github repositories of both Nerve and Ragweed and executing a 'git pull'
+    before using the tool.
+
 ## Usage
 
     $ ruby nerve.rb -h
 
-    Ragweed Nerve 1.1 (Use -h for help)
+    Ragweed Nerve 1.2 (Use -h for help)
 
     -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool)
     -b, --breakpoint_file FILE       Read all breakpoints from this file
@@ -67,7 +84,7 @@
     Keywords in breakpoint files:
     (order does not matter)
 
-    bp - An address (or a symbolic name in the case of Win32) where the debugger should set a breakpoint
+    bp - An address (or a symbolic name for Win32) where the debugger should set a breakpoint
     name - A name describing the breakpoint, typically a symbol or function name
     lib - An optional library name indicating where the symbol can be found, only useful with Linux/OSX
     bpc - Number of times to let this breakpoint hit before uninstalling it
@@ -86,6 +103,27 @@
     OS X  Breakpoint Configuration:
     bp=<Address>, name=<Function Name>, bpc=2
     bp=0x12345678, name=function_name, bpc=6
+
+## Breakpoint Scripts
+
+    Nerve supports breakpoint scripts that run when a breakpoint you have specified is executed. These
+    can be specified using the 'code=' keyword in your breakpoint configuration file (see above).
+    These scripts run within the scope of Nerve and the Ragweed breakpoint. This means your scripts
+    have access to all the helper methods and instance variables Ragweed makes available. Documenting
+    each of these is going to take a bit of time.
+
+    Helper Methods:
+
+    (please refer to Ragweed sources for now http://github.com/tduehr/ragweed)
+
+    Instance Variables:
+
+    @rw - The Ragweed instance, use this to call all Ragweed methods
+
+    Win32 Specific:
+        evt - A debugger event
+        ctx - A context structure holding registers
+        dir - a string indicating function 'enter' or 'leave'
 
 ## Examples
 
@@ -139,7 +177,7 @@
     bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/RtlAllocateHeap.rb
     ...
 
-    And here is the scripts/malloc.rb referenced in the breakpoint config file:
+    And here is the scripts/RtlAllocateHeap.rb referenced in the breakpoint config file:
 
     ...
     ## This script is for Win32 RtlAllocateHeap

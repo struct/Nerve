@@ -99,6 +99,7 @@ class Nerve
         @rw.attach if RUBY_PLATFORM !~ WINDOWS_OS
 
         self.set_breakpoints
+        log_str("Breakpoints set ...")
 
         @rw.save_bps(@bps)
 
@@ -134,8 +135,8 @@ class Nerve
 
     def set_breakpoints
         @bps.each do |o|
-            log_str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
-            
+            #log_str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
+
             case
                 when RUBY_PLATFORM =~ WINDOWS_OS
                     @rw.hook(o.addr, 0) do |evt, ctx, dir, args|
@@ -150,10 +151,8 @@ class Nerve
 
                         if o.hits.to_i > o.bpc.to_i and !o.bpc.nil?
                             o.flag = false
-                            ## XXX breakpoint_clear !?
-                            ## This needs to be cleaned up in ragweed
                             @rw.breakpoint_clear(ctx.eip-1)
-                            log_str("(Breakpoint #{o.name} cleared!)")
+                            log_str("(Breakpoint #{o.name} cleared)")
                         end
                     end
 
@@ -168,8 +167,6 @@ class Nerve
                         if o.hits.to_i > o.bpc.to_i
                             o.flag = false
                             r = @rw.get_registers
-                            ## XXX breakpoint_clear !?
-                            ## This needs to be cleaned up in ragweed
                             #@rw.breakpoint_clear(r[:eip]-1)
                         end
                     end ))
@@ -178,7 +175,7 @@ class Nerve
     end
 
     def analyze(o)
-        log_hit(o.addr, o.name)
+        #log_hit(o.addr, o.name)
         o.hits = o.hits.to_i + 1
     end
 

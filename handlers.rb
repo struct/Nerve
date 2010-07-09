@@ -27,6 +27,10 @@ when RUBY_PLATFORM =~ WINDOWS_OS
             end
         end
 
+        def on_load_dll(ev)
+            super
+        end
+
         def on_exit_process(ev)
             dump_stats(ev)
             super

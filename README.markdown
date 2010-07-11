@@ -7,7 +7,7 @@
     To learn more about Ragweed, read this:
     http://chargen.matasano.com/chargen/2009/8/27/ruby-for-pentesters-the-dark-side-i-ragweed.html
 
-    Nerve is a dynamic tracing tool for native x86 code.
+    Nerve can be a dynamic hit tracer, an in memory fuzzer or a simple scriptable debugger.
 
     Nerve showcases the best part about Ragweed: cross platform debugging. I originally
     wrote Nerve as a small Ragweed script that kept stats on the functions my fuzzers
@@ -38,11 +38,14 @@
     - Run Ruby scripts with full access to the debugger when breakpoints are hit
     - Extend Nerve with your own event handling methods in handlers.rb
     - Extend Nerves output with your own methods in common/output.rb
+    - Nerve comes with a few example scripts such a recv() fuzzer and SSL_read/SSL_write hooks
 
 ## Todo
 
 	Nerve is a simple tool, but we plan to grow it with optional add ons:
 
+    - A waiting mode that runs and polls for new processes matching the target
+    - Lots of helper scripts for breakpoints such as heap inspection, in memory fuzzing, SSL reads and so on
     - Helper methods and better named instance variables for making breakpoint scripts easier to write
     - Better output such as graphviz, statistics, function arguments etc...
     - An HTML5 canvas output mode
@@ -69,7 +72,7 @@
 
     $ ruby nerve.rb -h
 
-    Ragweed Nerve 1.2 (Use -h for help)
+    Ragweed Nerve 1.3 (Use -h for help)
 
     -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool)
     -b, --breakpoint_file FILE       Read all breakpoints from this file
@@ -118,7 +121,7 @@
 
     Instance Variables:
 
-    @rw - The Ragweed instance, use this to call all Ragweed methods
+    @ragweed - The Ragweed instance, use this to call all Ragweed methods
 
     Win32 Specific:
         evt - A debugger event
@@ -183,10 +186,10 @@
     ## This script is for Win32 RtlAllocateHeap
 
     if dir.to_s =~ /enter/
-        puts "Size requested #{@rw.process.read32(ctx.esp+12)}"
-        puts "Heap handle is @ #{@rw.process.read32(ctx.esp+4).to_s(16)}"
+        log.str "Size requested #{@ragweed.process.read32(ctx.esp+12)}"
+        log.str "Heap handle is @ #{@ragweed.process.read32(ctx.esp+4).to_s(16)}"
     else
-        puts "Heap chunk returned @ #{ctx.eax.to_s(16)}"
+        log.str "Heap chunk returned @ #{ctx.eax.to_s(16)}"
     end
     ...
 

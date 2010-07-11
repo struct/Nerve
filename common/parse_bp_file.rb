@@ -49,7 +49,7 @@ class Nerve
                     ## TODO - addr must already be parsed
                     ## for this to work correctly
                     if RUBY_PLATFORM =~ LINUX_OS
-                        @so.each_pair do |k,v|
+                        so.each_pair do |k,v|
                             if v =~ /#{o.lib}/
                                 o.base = k
                             end
@@ -64,7 +64,7 @@ class Nerve
             end
 
             o.hits = 0
-            @bps.push(o)
+            bps.push(o)
         end
     end
 end

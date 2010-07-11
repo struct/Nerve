@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 ## Nerve is a cross platform debugger designed for security researchers. It
-## is based on Ragweed (http://github.com/tduehr/ragweed)
+## is based on @ragweed (http://github.com/tduehr/@ragweed)
 ##
 ## Please refer to the README file for more information
 ##
@@ -20,15 +20,14 @@ require 'common/common'
 require 'common/constants'
 
 class Nerve
-    attr_accessor :pid, :threads, :bps, :so, :out, :stats
+    attr_accessor :ragweed, :pid, :threads, :bps, :so, :log
 
     def initialize(pid, bp_file)
         @pid = pid
         @bps = Array.new
         @threads = Array.new
         @out = NERVE_OPTS[:out]
-
-        self.log_init
+        @log = NerveLog.new(@out)
 
         case
             when RUBY_PLATFORM =~ WINDOWS_OS
@@ -36,27 +35,28 @@ class Nerve
                 parse_breakpoint_file(bp_file)
 
                 if @pid.kind_of?(String) && @pid.to_i == 0
-                    @rw = NerveWin32.find_by_regex(/#{@pid}/)
+                    @ragweed = NerveWin32.find_by_regex(/#{@pid}/)
                 else
-                    @rw = NerveWin32.new(@pid.to_i)
+                    @ragweed = NerveWin32.new(@pid.to_i, log)
                 end
 
                 self.check_pid
+                @ragweed.log_init(log)
 
                 ## FIX: debugger32 threads returns an OStruct
                 ## and pid is not always a Numeric value
-                @threads = @rw.process.threads(true)
+                @threads = @ragweed.process.threads(true)
 
                 if !@threads.nil?
                     @threads.each do |x|
-                        #log_str("#{x.th32OwnerProcessID} => #{x.th32ThreadID})"
+                        #log.str("#{x.th32OwnerProcessID} => #{x.th32ThreadID})"
                     end 
                 end
 
             when RUBY_PLATFORM =~ LINUX_OS
 
                 if @pid.kind_of?(String) && @pid.to_i == 0
-                    @pid = NerveLinux.find_by_regex(/#{@pid}/)
+                    @pid = NerveLinux.find_by_regex(/#{@pid}/).to_i
                 else
                     @pid = @pid.to_i
                 end
@@ -75,7 +75,8 @@ class Nerve
                     opts[:fork] = true
                 end
 
-                @rw = NerveLinux.new(@pid, opts)
+                @ragweed = NerveLinux.new(@pid, opts)
+                @ragweed.log_init(log)
 
             when RUBY_PLATFORM =~ OSX_OS
 
@@ -89,39 +90,40 @@ class Nerve
 
                 self.check_pid
 
-                @rw = NerveOSX.new(@pid)
-                @threads = @rw.threads
+                @ragweed = NerveOSX.new(@pid)
+                @ragweed.log_init(log)
+                @threads = @ragweed.threads
                 self.which_threads
         end
 
-        @rw.save_threads(@threads)
+        @ragweed.save_threads(@threads)
 
-        @rw.attach if RUBY_PLATFORM !~ WINDOWS_OS
+        @ragweed.attach if RUBY_PLATFORM !~ WINDOWS_OS
 
         self.set_breakpoints
-        log_str("Breakpoints set ...")
+        log.str("#{@bps.size} Breakpoints set ...")
 
-        @rw.save_bps(@bps)
+        @ragweed.save_bps(@bps)
 
         if RUBY_PLATFORM !~ WINDOWS_OS
-            @rw.install_bps
+            @ragweed.install_bps
 
             if NERVE_OPTS[:fork] == true && RUBY_PLATFORM =~ LINUX_OS
-                @rw.set_options(Ragweed::Wraptux::Ptrace::SetOptions::TRACEFORK)
+                @ragweed.set_options(@ragweed::Wraptux::Ptrace::SetOptions::TRACEFORK)
             end
 
-            @rw.continue
+            @ragweed.continue
         end
 
         trap("INT") do
-            @rw.uninstall_bps if RUBY_PLATFORM !~ WINDOWS_OS
+            @ragweed.uninstall_bps if RUBY_PLATFORM !~ WINDOWS_OS
             dump_stats
-            log_finalize
+            log.finalize
             exit
         end
 
         catch(:throw) do
-            @rw.loop
+            @ragweed.loop
         end
 
         self.dump_stats
@@ -135,11 +137,11 @@ class Nerve
 
     def set_breakpoints
         @bps.each do |o|
-            #log_str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
+            #log.str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
 
             case
                 when RUBY_PLATFORM =~ WINDOWS_OS
-                    @rw.hook(o.addr, 0) do |evt, ctx, dir, args|
+                    @ragweed.hook(o.addr, 0) do |evt, ctx, dir, args|
                         ## Call the ruby code associated with this breakpoint
                         if !o.code.nil?
                             eval(o.code)
@@ -151,13 +153,13 @@ class Nerve
 
                         if o.hits.to_i > o.bpc.to_i and !o.bpc.nil?
                             o.flag = false
-                            @rw.breakpoint_clear(ctx.eip-1)
-                            log_str("(Breakpoint #{o.name} cleared)")
+                            @ragweed.breakpoint_clear(ctx.eip-1)
+                            log.str("(Breakpoint #{o.name} cleared)")
                         end
                     end
 
                 when RUBY_PLATFORM =~ LINUX_OS, RUBY_PLATFORM =~ OSX_OS
-                    @rw.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do 
+                    @ragweed.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do 
                         if !o.code.nil?
                             eval(o.code)
                         end
@@ -166,8 +168,8 @@ class Nerve
 
                         if o.hits.to_i > o.bpc.to_i
                             o.flag = false
-                            r = @rw.get_registers
-                            #@rw.breakpoint_clear(r[:eip]-1)
+                            r = @ragweed.get_registers
+                            #@ragweed.breakpoint_clear(r[:eip]-1)
                         end
                     end ))
             end
@@ -175,7 +177,7 @@ class Nerve
     end
 
     def analyze(o)
-        #log_hit(o.addr, o.name)
+        #log.hit(o.addr, o.name)
         o.hits = o.hits.to_i + 1
     end
 
@@ -187,10 +189,10 @@ class Nerve
     ## We need a better way of handling interrupts
     ## so we dont have to duplicate this method!
     def dump_stats
-        log_str("Dumping breakpoint stats ...")
+        log.str("Dumping breakpoint stats ...")
         @bps.each do |o|
             if o.addr != 0
-                log_str("#{o.addr} - #{o.name} | #{o.hits} hit(s)")
+                log.str("#{o.addr} - #{o.name} | #{o.hits} hit(s)")
             end
         end
     end
@@ -204,7 +206,7 @@ NERVE_OPTS = {
 }
 
 opts = OptionParser.new do |opts|
-    opts.banner = "\nRagweed Nerve 1.2 (Use -h for help)\n\n"
+    opts.banner = "\n@ragweed Nerve 1.3 (Use -h for help)\n\n"
 
     opts.on("-p", "--pid PID/Name", "Attach to this pid OR process name (ex: -p 12345 | -p gcalctool)") do |o|
         NERVE_OPTS[:pid] = o

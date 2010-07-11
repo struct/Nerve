@@ -38,7 +38,7 @@
     - Run Ruby scripts with full access to the debugger when breakpoints are hit
     - Extend Nerve with your own event handling methods in handlers.rb
     - Extend Nerves output with your own methods in common/output.rb
-    - Nerve comes with a few example scripts such a recv() fuzzer and SSL_read/SSL_write hooks
+    - Nerve comes with a few example scripts such as hooking RtlAllocateHeap and malloc
 
 ## Todo
 

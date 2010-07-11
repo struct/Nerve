@@ -7,15 +7,15 @@ def mutate(data, len)
 end
 
 if dir.to_s =~ /enter/
-    @addr = @rw.process.read32(ctx.esp+8)
-    @maxlen = @rw.process.read32(ctx.esp+12)
+    @addr = @ragweed.process.read32(ctx.esp+8)
+    @maxlen = @ragweed.process.read32(ctx.esp+12)
 else
     len = ctx.eax
     if len != 0xffffffff
 
         log_str "--> Read #{len.to_s(16)} to #{@addr.to_s(16)}"
 
-        data = @rw.process.read(@addr, len)
-        @rw.process.write(@addr, mutate(data, len))
+        data = @ragweed.process.read(@addr, len)
+        @ragweed.process.write(@addr, mutate(data, len))
     end
 end

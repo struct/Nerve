@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-## Nerve is a cross platform debugger designed for security researchers. It
-## is based on @ragweed (http://github.com/tduehr/@ragweed)
+## Nerve is a cross platform debugger designed for security researchers.
+## It is based on @ragweed (http://github.com/tduehr/@ragweed)
 ##
 ## Please refer to the README file for more information
 ##
@@ -40,7 +40,11 @@ class Nerve
                     @ragweed = NerveWin32.new(@pid.to_i, log)
                 end
 
-                self.check_pid
+                if @ragweed.nil?
+                    puts "Failed to find process: #{@pid}"
+                    exit
+                end
+
                 @ragweed.log_init(log)
 
                 ## FIX: debugger32 threads returns an OStruct
@@ -61,7 +65,10 @@ class Nerve
                     @pid = @pid.to_i
                 end
 
-                self.check_pid
+                if @ragweed.nil?
+                    puts "Failed to find process: #{@pid}"
+                    exit
+                end
 
                 @so = NerveLinux.procparse(@pid)
                 parse_breakpoint_file(bp_file)
@@ -88,7 +95,10 @@ class Nerve
                     @pid = @pid.to_i
                 end
 
-                self.check_pid
+                if @ragweed.nil?
+                    puts "Failed to find process: #{@pid}"
+                    exit
+                end
 
                 @ragweed = NerveOSX.new(@pid)
                 @ragweed.log_init(log)
@@ -127,12 +137,6 @@ class Nerve
         end
 
         self.dump_stats
-    end
-
-    def check_pid
-        if @pid.nil?
-            puts "Need a valid PID!"
-        end
     end
 
     def set_breakpoints

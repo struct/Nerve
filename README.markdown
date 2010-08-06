@@ -171,7 +171,7 @@
 
 ## Examples
 
-    Heres some example output from Nerve.
+    Heres some example output from Nerve running on Ubuntu:
 
     chris@ubuntu:/# ruby nerve.rb -b example_breakpoint_files/generic_ubuntu_910_libc_trace.txt -p test
     Nerve ...
@@ -191,8 +191,8 @@
     0x0a8ae60 - write | 0 hit(s)
     ... Done!
 
-    Nerve running on Windows 7 and debugging an example program that calls HeapAlloc. For this test
-    program we want to run a simple ruby script each time HeapAlloc is entered and exited.
+    Here is Nerve running on Windows 7 and debugging an example program that calls HeapAlloc. For
+    this test program we want to run a simple ruby script each time HeapAlloc is entered and exited.
 
     Test Program:
 

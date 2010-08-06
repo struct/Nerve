@@ -22,18 +22,14 @@ class Nerve
             h.handler
             h.path
 
-            begin
-              hdlrs.each do |l|
-                  if tl.match(/#{l}/)
-                    i,p = tl.split("=")
-                    h.handler = i
-                    h.path = p
-                    event_handlers.push(h)
-                    break
-                  end
+            hdlrs.each do |l|
+              if tl.match(/#{l}/)
+                i,p = tl.split("=")
+                h.handler = i
+                h.path = p
+                event_handlers.push(h)
+                next
               end
-            rescue
-              next
             end
 
             o = OpenStruct.new

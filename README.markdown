@@ -70,17 +70,57 @@
 
 ## Usage
 
-    $ ruby nerve.rb -h
+    $ ruby nerve.rb --help
 
-    Ragweed Nerve 1.3 (Use -h for help)
+    Nerve 1.4
 
     -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool)
-    -b, --breakpoint_file FILE       Read all breakpoints from this file
+    -b, --config_file FILE           Read all breakpoints and handler event configurations from this file
     -o, --output FILE                Dump all output to a file
     -f                               Optional flag indicates whether or not to trace forked child processes (Linux only)
 
     Yes, it 'Just Works'! If you want to write more complex tools then I encourage you to look
     at the ragweed library, or extend Nerve's signal handlers with your own methods.
+
+## Event Handlers Configuration Example
+
+    Keywords in event handlers configuration files:
+
+    on_access_violation
+    on_alignment
+    on_attach
+    on_bounds
+    on_breakpoint
+    on_continue
+    on_create_process
+    on_create_thread
+    on_detach
+    on_divide_by_zero
+    on_exit
+    on_exit_process
+    on_exit_thread
+    on_fork_child
+    on_illegalinst
+    on_int_overflow
+    on_invalid_disposition
+    on_invalid_handle
+    on_load_dll
+    on_output_debug_string
+    on_priv_instruction
+    on_rip
+    on_segv
+    on_signal
+    on_sigstop
+    on_sigterm
+    on_sigtrap
+    on_single_step
+    on_stack_overflow
+    on_stop
+    on_unload_dll
+
+    Example:
+
+    on_load_dll=My_OnLoad_DLL.rb
 
 ## Breakpoint File Example
 

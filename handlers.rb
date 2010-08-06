@@ -9,7 +9,7 @@ case
 when RUBY_PLATFORM =~ WINDOWS_OS
     class NerveWin32 < Ragweed::Debugger32
 
-        attr_accessor :log, :pid, :bps, :threads
+        attr_accessor :log, :pid, :bps, :threads, :event_handlers
 
         def initialize(pid)
             @pid = pid
@@ -22,6 +22,7 @@ when RUBY_PLATFORM =~ WINDOWS_OS
 
         def save_bps(b) @bps = b; end
         def save_threads(t) @threads = t; end
+        def save_handlers(h) @event_handlers = h end
 
         def dump_stats(ev)
             a = self.context(ev)
@@ -80,6 +81,7 @@ when RUBY_PLATFORM =~ LINUX_OS
 
         def save_bps(b) @bps = b; end
         def save_threads(t) @threads = t; end
+        def save_handlers(h) @event_handlers = h end
 
         def dump_stats
             log.str "Dumping stats"
@@ -166,6 +168,7 @@ when RUBY_PLATFORM =~ OSX_OS
 
         def save_bps(b) @bps = b; end
         def save_threads(t) @threads = t; end
+        def save_handlers(h) @event_handlers = h end
 
         def dump_stats
             log.str "Dumping stats"

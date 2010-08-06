@@ -14,17 +14,18 @@ require 'ragweed'
 require 'optparse'
 require 'handlers'
 require 'ostruct'
-require 'common/parse_bp_file'
+require 'common/parse_config_file'
 require 'common/output'
 require 'common/common'
 require 'common/constants'
 
 class Nerve
-    attr_accessor :ragweed, :pid, :threads, :bps, :so, :log
+    attr_accessor :ragweed, :pid, :threads, :bps, :so, :log, :event_handlers
 
     def initialize(pid, bp_file)
         @pid = pid
         @bps = Array.new
+        @event_handlers = Array.new
         @threads = Array.new
         @out = NERVE_OPTS[:out]
         @log = NerveLog.new(@out)
@@ -32,7 +33,7 @@ class Nerve
         case
             when RUBY_PLATFORM =~ WINDOWS_OS
 
-                parse_breakpoint_file(bp_file)
+                parse_config_file(bp_file)
 
                 if @pid.kind_of?(String) && @pid.to_i == 0
                     @ragweed = NerveWin32.find_by_regex(/#{@pid}/)
@@ -65,13 +66,8 @@ class Nerve
                     @pid = @pid.to_i
                 end
 
-                if @ragweed.nil?
-                    puts "Failed to find process: #{@pid}"
-                    exit
-                end
-
                 @so = NerveLinux.procparse(@pid)
-                parse_breakpoint_file(bp_file)
+                parse_config_file(bp_file)
 
                 @threads = NerveLinux.threads(@pid)
                 self.which_threads
@@ -83,11 +79,17 @@ class Nerve
                 end
 
                 @ragweed = NerveLinux.new(@pid, opts)
+
+                if @ragweed.nil?
+                    puts "Failed to find process: #{@pid}"
+                    exit
+                end
+
                 @ragweed.log_init(log)
 
             when RUBY_PLATFORM =~ OSX_OS
 
-                parse_breakpoint_file(bp_file)
+                parse_config_file(bp_file)
 
                 if @pid.kind_of?(String) && @pid.to_i.nil?
                     @pid = NerveOSX.find_by_regex(/#{@pid}/)
@@ -95,12 +97,13 @@ class Nerve
                     @pid = @pid.to_i
                 end
 
+                @ragweed = NerveOSX.new(@pid)
+
                 if @ragweed.nil?
                     puts "Failed to find process: #{@pid}"
                     exit
                 end
 
-                @ragweed = NerveOSX.new(@pid)
                 @ragweed.log_init(log)
                 @threads = @ragweed.threads
                 self.which_threads
@@ -136,17 +139,18 @@ class Nerve
             @ragweed.loop
         end
 
+        ## We shouldn't reach this but if we
+        ## do we still want to see bp stats
         self.dump_stats
     end
 
     def set_breakpoints
         @bps.each do |o|
-            #log.str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
+            log.str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
 
             case
                 when RUBY_PLATFORM =~ WINDOWS_OS
                     @ragweed.hook(o.addr, 0) do |evt, ctx, dir, args|
-                        ## Call the ruby code associated with this breakpoint
                         if !o.code.nil?
                             eval(o.code)
                         end
@@ -156,8 +160,8 @@ class Nerve
                         end
 
                         if o.hits.to_i > o.bpc.to_i and !o.bpc.nil?
-                            o.flag = false
                             @ragweed.breakpoint_clear(ctx.eip-1)
+                            o.flag = false
                             log.str("(Breakpoint #{o.name} cleared)")
                         end
                     end
@@ -185,13 +189,9 @@ class Nerve
         o.hits = o.hits.to_i + 1
     end
 
-    ## We still want to dump stats if we Ctrl+C
-    ## Note: this method is different then the
-    ## one in handlers.rb for Win32. Fortunately
-    ## there is also a on_exit_process which will
-    ## dump the context for us.
-    ## We need a better way of handling interrupts
-    ## so we dont have to duplicate this method!
+    ## This dump_stats differs from the one
+    ## in handlers.rb. This is because its
+    ## called when the user hits Ctrl+C
     def dump_stats
         log.str("Dumping breakpoint stats ...")
         @bps.each do |o|
@@ -210,13 +210,13 @@ NERVE_OPTS = {
 }
 
 opts = OptionParser.new do |opts|
-    opts.banner = "\n@ragweed Nerve 1.3 (Use -h for help)\n\n"
+    opts.banner = "\nNerve 1.4\n\n"
 
     opts.on("-p", "--pid PID/Name", "Attach to this pid OR process name (ex: -p 12345 | -p gcalctool)") do |o|
         NERVE_OPTS[:pid] = o
     end
 
-    opts.on("-b", "--breakpoint_file FILE", "Read all breakpoints from this file") do |o|
+    opts.on("-b", "--config_file FILE", "Read all breakpoints and handler event configurations from this file") do |o|
         NERVE_OPTS[:bp_file] = o
     end
 

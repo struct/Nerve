@@ -85,6 +85,7 @@
 ## Event Handlers Configuration Example
 
     Keywords in event handlers configuration files:
+    (this feature is currently in development)
 
     on_access_violation
     on_alignment

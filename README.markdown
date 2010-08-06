@@ -182,12 +182,13 @@
     Setting breakpoint: [0x017f840,malloc@/lib/tls/i686/cmov/libc-2.10.1.so]
     Setting breakpoint: [0x0185010,memcpy@/lib/tls/i686/cmov/libc-2.10.1.so]
     ^CDumping stats
-    0x01ccff0 hit 5 times
-    0x01ccf70 hit 0 times
-    0x017f760 hit 2 times
-    0x018b460 hit 0 times
-    0x017f840 hit 3 times
-    0x0185010 hit 0 times
+    0x0a3cf40 - malloc | 5279 hit(s)
+    0x08055590 - mp_add | 0 hit(s)
+    0x0a49830 - wmemcpy | 0 hit(s)
+    0x0a41f20 - memcpy | 0 hit(s)
+    0x0a3ce60 - free | 8385 hit(s)
+    0x0a8ade0 - read | 0 hit(s)
+    0x0a8ae60 - write | 0 hit(s)
     ... Done!
 
     Nerve running on Windows 7 and debugging an example program that calls HeapAlloc. For this test

@@ -3,6 +3,7 @@
 ## What is it?
 
     Nerve is based on, and requires, Ragweed http://github.com/tduehr/ragweed
+    Ragweed is a cross platform x86 debugging library written in Ruby.
 
     To learn more about Ragweed, read this:
     http://chargen.matasano.com/chargen/2009/8/27/ruby-for-pentesters-the-dark-side-i-ragweed.html
@@ -14,7 +15,7 @@
     were triggering in my target process. This let me know what code paths my fuzzer was
     reaching and which ones it wasn't. It only took a few hours to make it work on all Ragweed
     supported platforms, and since then it has grown into a better tool. It now supports
-    breakpoint configuration files, ruby scripts per breakpoint and more.
+    simple configuration files for breakpoints, event handler scripts and more.
 
 ## Supported Platforms
 
@@ -29,40 +30,42 @@
 
     At this time only Ruby 1.8.x has been tested. We are actively investigating both 64 bit
     support for each platform and support for Ruby 1.9.x. Unfortunately both of these things
-    require changes to Ragweed.
+    require changes to Ragweed. If you have any interest in helping with this, let us know!
 
 ## Features
 
     - Cross platform (see above)
-    - Easy breakpoint configuration files you can write by hand or generate using our tools
+    - Easy configuration files you can write by hand or generate using our tools
     - Run Ruby scripts with full access to the debugger when breakpoints are hit
-    - Extend Nerve with your own event handling methods in handlers.rb
-    - Extend Nerves output with your own methods in common/output.rb
-    - Nerve comes with a few example scripts such as hooking RtlAllocateHeap and malloc
+    - Run Ruby scripts when specific debugging events occur
+    - Extend Nerve through handlers.rb or output.rb with minimal code
+    - Nerve comes with a few example brekapoint scripts such as hooking RtlAllocateHeap/malloc
 
 ## Todo
 
 	Nerve is a simple tool, but we plan to grow it with optional add ons:
 
     - A waiting mode that runs and polls for new processes matching the target
-    - Lots of helper scripts for breakpoints such as heap inspection, in memory fuzzing, SSL reads and so on
+    - Lots of helper scripts for breakpoints such as heap inspection, in memory fuzzing, SSL reads etc...
     - Helper methods and better named instance variables for making breakpoint scripts easier to write
     - Better output such as graphviz, statistics, function arguments etc...
     - An HTML5 canvas output mode
 	- A basic RubyWX GUI
 	- Redis database support
-    - Nerve is helping us find the areas of Ragweed that need the most improvement
+    - Nerve is also helping us find the areas of Ragweed that need the most improvement
   
 ## Requirements
 
     Nerve has one small dependency. But don't worry, theres no need to install an SQL server
     or compile any code! The dependency, Ragweed, can be installed via Ruby gems on any platform.
 
-    - Ragweed (a cross platform debugger library)
-    - http://github.com/tduehr/ragweed
-    - gem install -r ragweed
+    Ragweed (a cross platform x86 debugger library)
 
-    YES thats it!
+    - git clone http://github.com/tduehr/ragweed.git    (the preferred method)
+    OR
+    - gem install -r ragweed   (you will get an older version)
+
+    YES, thats it!
 
     If you want to run the bleeding edge stuff we commit to github everyday then I suggest
     checking out the github repositories of both Nerve and Ragweed and executing a 'git pull'
@@ -82,10 +85,58 @@
     Yes, it 'Just Works'! If you want to write more complex tools then I encourage you to look
     at the ragweed library, or extend Nerve's signal handlers with your own methods.
 
+## Breakpoint File Example
+
+    Keywords in breakpoint files:
+    (order does not matter)
+
+    bp - An address (or a symbolic name for Win32) where the debugger should set a breakpoint
+    name - A name describing the breakpoint, typically a symbol or function name
+    lib - An optional library name indicating where the symbol can be found, only useful with Linux/OSX
+    bpc - Number of times to let this breakpoint hit before uninstalling it
+    code - Location of a script that holds ruby code to be executed when this breakpoint hits    
+
+    --
+
+    Win32 Configuration:
+    bp=0x12345678, name=SomeFunction, bpc=2, code=scripts/SomeFunctionAnalysis.rb
+    bp=kernel32!CreateFileW, name=CreateFileW, code=scripts/CreateFileW_Analysis.rb
+
+    Linux Configuration:
+    bp=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1, code=scripts/ncurses_trace.rb
+    name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40 code=scripts/malloc_linux.rb
+
+    OS X Configuration:
+    bp=0x12345678, name=function_name, bpc=6
+
+## Breakpoint Scripts
+
+    Nerve supports breakpoint scripts that run when a breakpoint you have specified is executed. These
+    can be specified using the 'code=' keyword in your Nerve configuration file (see above).
+    These scripts run within the scope of Nerve and the Ragweed breakpoint. This means your scripts
+    have access to all the helper methods and instance variables Ragweed makes available. Documenting
+    each of these is going to take a bit of time.
+
+    Helper Methods:
+
+    (please refer to Ragweed sources for now http://github.com/tduehr/ragweed)
+
+    Instance Variables:
+
+    @ragweed - The Ragweed instance, use this to call all Ragweed methods
+
+    Win32 Specific:
+        evt - A debugger event
+        ctx - A context structure holding registers
+        dir - a string indicating function 'enter' or 'leave'
+
 ## Event Handlers Configuration Example
 
-    Keywords in event handlers configuration files:
-    (this feature is currently in development)
+    Event handler scripts work just like breakpoint file scripts. They have full access to the debugger
+    but are triggered when specific debug events occur such as 'on_load_dll'. See handlers.rb for how
+    they are implemented.
+
+    Keywords for configuration files:
 
     on_access_violation
     on_alignment
@@ -119,55 +170,9 @@
     on_stop
     on_unload_dll
 
-    Example:
+    This example will run the My_OnLoad_DLL.rb script whenever the Load DLL debug event occurs:
 
-    on_load_dll=My_OnLoad_DLL.rb
-
-## Breakpoint File Example
-
-    Keywords in breakpoint files:
-    (order does not matter)
-
-    bp - An address (or a symbolic name for Win32) where the debugger should set a breakpoint
-    name - A name describing the breakpoint, typically a symbol or function name
-    lib - An optional library name indicating where the symbol can be found, only useful with Linux/OSX
-    bpc - Number of times to let this breakpoint hit before uninstalling it
-    code - Location of a script that holds ruby code to be executed when this breakpoint hits    
-
-    --
-
-    Win32 Breakpoint Configuration:
-    bp=0x12345678, name=SomeFunction, bpc=2, code=scripts/SomeFunctionAnalysis.rb
-    bp=kernel32!CreateFileW, name=CreateFileW, code=scripts/CreateFileW_Analysis.rb
-
-    Linux Breakpoint Configuration:
-    bp=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1, code=scripts/ncurses_trace.rb
-    name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40 code=scripts/malloc_linux.rb
-
-    OS X  Breakpoint Configuration:
-    bp=<Address>, name=<Function Name>, bpc=2
-    bp=0x12345678, name=function_name, bpc=6
-
-## Breakpoint Scripts
-
-    Nerve supports breakpoint scripts that run when a breakpoint you have specified is executed. These
-    can be specified using the 'code=' keyword in your breakpoint configuration file (see above).
-    These scripts run within the scope of Nerve and the Ragweed breakpoint. This means your scripts
-    have access to all the helper methods and instance variables Ragweed makes available. Documenting
-    each of these is going to take a bit of time.
-
-    Helper Methods:
-
-    (please refer to Ragweed sources for now http://github.com/tduehr/ragweed)
-
-    Instance Variables:
-
-    @ragweed - The Ragweed instance, use this to call all Ragweed methods
-
-    Win32 Specific:
-        evt - A debugger event
-        ctx - A context structure holding registers
-        dir - a string indicating function 'enter' or 'leave'
+    on_load_dll=scripts/My_OnLoad_DLL.rb
 
 ## Examples
 
@@ -175,13 +180,13 @@
 
     chris@ubuntu:/# ruby nerve.rb -b example_breakpoint_files/generic_ubuntu_910_libc_trace.txt -p test
     Nerve ...
-    Setting breakpoint: [ 0x0964f40, malloc /lib/tls/i686/cmov/libc-2.11.1.so]
+    Setting breakpoint: [ 0x0964f40, malloc /lib/tls/i686/cmov/libc-2.11.1.so ]
     Setting breakpoint: [ 0x08055590, mp_add ]
-    Setting breakpoint: [ 0x0971830, wmemcpy /lib/tls/i686/cmov/libc-2.11.1.so]
-    Setting breakpoint: [ 0x0969f20, memcpy /lib/tls/i686/cmov/libc-2.11.1.so]
-    Setting breakpoint: [ 0x0964e60, free /lib/tls/i686/cmov/libc-2.11.1.so]
-    Setting breakpoint: [ 0x09b2de0, read /lib/tls/i686/cmov/libc-2.11.1.so]
-    Setting breakpoint: [ 0x09b2e60, write /lib/tls/i686/cmov/libc-2.11.1.so]
+    Setting breakpoint: [ 0x0971830, wmemcpy /lib/tls/i686/cmov/libc-2.11.1.so ]
+    Setting breakpoint: [ 0x0969f20, memcpy /lib/tls/i686/cmov/libc-2.11.1.so ]
+    Setting breakpoint: [ 0x0964e60, free /lib/tls/i686/cmov/libc-2.11.1.so ]
+    Setting breakpoint: [ 0x09b2de0, read /lib/tls/i686/cmov/libc-2.11.1.so ]
+    Setting breakpoint: [ 0x09b2e60, write /lib/tls/i686/cmov/libc-2.11.1.so ]
     ^CDumping stats
     0x0a3cf40 - malloc | 5279 hit(s)
     0x08055590 - mp_add | 0 hit(s)
@@ -217,13 +222,13 @@
     }
     ...
 
-    Here is the breakpoint configuration file:
+    Here is the configuration file:
 
     ...
     bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/RtlAllocateHeap.rb
     ...
 
-    And here is the scripts/RtlAllocateHeap.rb referenced in the breakpoint config file:
+    And here is the scripts/RtlAllocateHeap.rb referenced in the configuration file:
 
     ...
     ## This script is for Win32 RtlAllocateHeap
@@ -276,3 +281,5 @@
 Nerve was written by Chris Rohlf, and is also developed by Alex Rad
 
 Ragweed was written by Thomas Ptacek, ported to OSX by Timur Duehr and ported to Linux by Chris Rohlf
+
+Thanks to the Matasano team and a few other individuals for providing feedback and ideas

@@ -1,13 +1,7 @@
 #!/usr/bin/env ruby
 
-## Nerve is a cross platform debugger designed for security researchers.
-## It is based on @ragweed (http://github.com/tduehr/@ragweed)
-##
+## Nerve is a scriptable debugger built on Ragweed
 ## Please refer to the README file for more information
-##
-## Nerve is developed by:
-## Chris @ Matasano.com
-## AlexRad
 
 require 'rubygems'
 require 'ragweed'
@@ -225,6 +219,7 @@ opts = OptionParser.new do |opts|
         NERVE_OPTS[:out] = File.open(o, "w") rescue (bail $!)
     end
 
+    ## FIX: Port this feature when Ragweed is ready
     if RUBY_PLATFORM =~ LINUX_OS
         opts.on("-f", "Optional flag indicates whether or not to trace forked child processes (Linux only)\n\n") do |o|
             NERVE_OPTS[:fork] = true

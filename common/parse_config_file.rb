@@ -18,16 +18,13 @@ class Nerve
 
             if tl.match(';') or tl.nil? then next end
 
-            h = OpenStruct.new
-            h.handler
-            h.path
-
             hdlrs.each do |l|
               if tl.match(/#{l}/)
                 i,p = tl.split("=")
-                h.handler = i
-                h.path = p
-                event_handlers.push(h)
+                i.gsub!(/[\s\n]+/, "")
+                p.gsub!(/[\s\n]+/, "")
+                p = File.read(p)
+                event_handlers.store(i,p)
                 next
               end
             end

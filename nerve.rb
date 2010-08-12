@@ -25,7 +25,7 @@ class Nerve
     def initialize(pid, bp_file)
         @pid = pid
         @bps = Array.new
-        @event_handlers = Array.new
+        @event_handlers = Hash.new
         @threads = Array.new
         @out = NERVE_OPTS[:out]
         @log = NerveLog.new(@out)
@@ -110,6 +110,7 @@ class Nerve
         end
 
         @ragweed.save_threads(@threads)
+        @ragweed.save_handlers(@event_handlers)
 
         @ragweed.attach if RUBY_PLATFORM !~ WINDOWS_OS
 
@@ -146,7 +147,7 @@ class Nerve
 
     def set_breakpoints
         @bps.each do |o|
-            log.str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib}]")
+            log.str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib} ]")
 
             case
                 when RUBY_PLATFORM =~ WINDOWS_OS

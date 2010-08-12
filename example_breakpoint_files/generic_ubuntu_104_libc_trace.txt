@@ -9,3 +9,4 @@ bp=0x0074f20, name=memcpy, lib=/lib/tls/i686/cmov/libc-2.11.1.so
 bp=0x006fe60, name=free, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=1
 bp=0x00bdde0, name=read, lib=/lib/tls/i686/cmov/libc-2.11.1.so
 bp=0x00bde60, name=write, lib=/lib/tls/i686/cmov/libc-2.11.1.so
+on_attach=scripts/on_attach.rb

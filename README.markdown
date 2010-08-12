@@ -1,4 +1,4 @@
-# Nerve is a simple cross platform (Win32, Linux, OSX) x86 hit tracer
+# Nerve is a simple cross platform (Win32, Linux, OSX) x86 scriptable debugger
 
 ## What is it?
 

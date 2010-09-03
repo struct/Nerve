@@ -34,6 +34,7 @@ class Nerve
 			o.flag = true
 			o.hits = 0
             o.bpc = nil
+            o.nargs = 0
 
             r = tl.split(",")
 
@@ -53,6 +54,11 @@ class Nerve
                 if e.match(/bpc=/)
                     bpc = e.split("bpc=").last
                     o.bpc = bpc.to_i
+                end
+
+                if e.match(/bpc=/)
+                    nargs = e.split("nargs=").last
+                    o.nargs = nargs.to_i
                 end
 
                 if e.match(/code=/)

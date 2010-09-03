@@ -29,7 +29,7 @@ class Nerve
 
                 parse_config_file(bp_file)
 
-                if @pid.kind_of?(String) && @pid.to_i == 0
+                if @pid.kind_of?(String) and @pid.to_i == 0
                     @ragweed = NerveWin32.find_by_regex(/#{@pid}/)
                 else
                     @ragweed = NerveWin32.new(@pid.to_i, log)
@@ -48,13 +48,13 @@ class Nerve
 
                 if !@threads.nil?
                     @threads.each do |x|
-                        #log.str("#{x.th32OwnerProcessID} => #{x.th32ThreadID})"
+                        #log.str "#{x.th32OwnerProcessID} => #{x.th32ThreadID})"
                     end 
                 end
 
             when RUBY_PLATFORM =~ LINUX_OS
 
-                if @pid.kind_of?(String) && @pid.to_i == 0
+                if @pid.kind_of?(String) and @pid.to_i == 0
                     @pid = NerveLinux.find_by_regex(/#{@pid}/).to_i
                 else
                     @pid = @pid.to_i
@@ -85,7 +85,7 @@ class Nerve
 
                 parse_config_file(bp_file)
 
-                if @pid.kind_of?(String) && @pid.to_i.nil?
+                if @pid.kind_of?(String) and @pid.to_i.nil?
                     @pid = NerveOSX.find_by_regex(/#{@pid}/)
                 else
                     @pid = @pid.to_i
@@ -109,14 +109,14 @@ class Nerve
         @ragweed.attach if RUBY_PLATFORM !~ WINDOWS_OS
 
         self.set_breakpoints
-        log.str("#{@bps.size} Breakpoints set ...")
+        log.str "#{@bps.size} Breakpoints set ..."
 
         @ragweed.save_bps(@bps)
 
         if RUBY_PLATFORM !~ WINDOWS_OS
             @ragweed.install_bps
 
-            if NERVE_OPTS[:fork] == true && RUBY_PLATFORM =~ LINUX_OS
+            if NERVE_OPTS[:fork] == true and RUBY_PLATFORM =~ LINUX_OS
                 @ragweed.set_options(@ragweed::Wraptux::Ptrace::SetOptions::TRACEFORK)
             end
 
@@ -141,11 +141,11 @@ class Nerve
 
     def set_breakpoints
         @bps.each do |o|
-            log.str("Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib} ]")
+            log.str "Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib} ]"
 
             case
                 when RUBY_PLATFORM =~ WINDOWS_OS
-                    @ragweed.hook(o.addr, 0) do |evt, ctx, dir, args|
+                    @ragweed.hook(o.addr, o.nargs) do |evt, ctx, dir, args|
                         if !o.code.nil?
                             eval(o.code)
                         end
@@ -154,10 +154,9 @@ class Nerve
                             analyze(o)
                         end
 
-                        if o.hits.to_i > o.bpc.to_i and !o.bpc.nil?
-                            @ragweed.breakpoint_clear(ctx.eip-1)
+                        if !o.bpc.nil? and o.hits.to_i > o.bpc.to_i
+                            r = @ragweed.breakpoint_clear(ctx.eip-1)
                             o.flag = false
-                            log.str("(Breakpoint #{o.name} cleared)")
                         end
                     end
 
@@ -188,10 +187,10 @@ class Nerve
     ## in handlers.rb. This is because its
     ## called when the user hits Ctrl+C
     def dump_stats
-        log.str("Dumping breakpoint stats ...")
+        log.str "Dumping breakpoint stats ..."
         @bps.each do |o|
             if o.addr != 0
-                log.str("#{o.addr} - #{o.name} | #{o.hits} hit(s)")
+                log.str "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
             end
         end
     end
@@ -205,9 +204,9 @@ NERVE_OPTS = {
 }
 
 opts = OptionParser.new do |opts|
-    opts.banner = "\nNerve 1.4\n\n"
+    opts.banner = "\nNerve 1.5\n\n"
 
-    opts.on("-p", "--pid PID/Name", "Attach to this pid OR process name (ex: -p 12345 | -p gcalctool)") do |o|
+    opts.on("-p", "--pid PID/Name", "Attach to this pid OR process name (ex: -p 12345 | -p gcalctool | -p notepad.exe)") do |o|
         NERVE_OPTS[:pid] = o
     end
 
@@ -215,7 +214,7 @@ opts = OptionParser.new do |opts|
         NERVE_OPTS[:bp_file] = o
     end
 
-    opts.on("-o", "--output FILE", "Dump all output to a file") do |o|
+    opts.on("-o", "--output FILE", "Dump all output to a file (default is STDOUT)") do |o|
         NERVE_OPTS[:out] = File.open(o, "w") rescue (bail $!)
     end
 

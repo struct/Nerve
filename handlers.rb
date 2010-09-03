@@ -26,7 +26,9 @@ when RUBY_PLATFORM =~ WINDOWS_OS
 
         def exec_eh_script(name, ev=nil)
             begin
-                eval(@event_handlers[name])
+                if !@event_handlers[name].nil?
+                    eval(@event_handlers[name])
+                end
             rescue
             end
         end
@@ -41,6 +43,7 @@ when RUBY_PLATFORM =~ WINDOWS_OS
             bps.each do |o|
                 log.str "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
             end
+exit
         end
 
         def on_access_violation(ev)
@@ -52,6 +55,7 @@ when RUBY_PLATFORM =~ WINDOWS_OS
         def on_exit_process(ev)
             exec_eh_script("on_exit_process", ev)
             dump_stats(ev)
+            log.str "Process exited!"
             super
         end
 

@@ -12,19 +12,23 @@
 
     Nerve showcases the best part about Ragweed: cross platform debugging. I originally
     wrote Nerve as a small Ragweed script that kept stats on the functions my fuzzers
-    were triggering in my target process. This let me know what code paths my fuzzer was
+    were triggering in a target process. This told me what code paths my fuzzer was
     reaching and which ones it wasn't. It only took a few hours to make it work on all Ragweed
-    supported platforms, and since then it has grown into a better tool. It now supports
-    simple configuration files for breakpoints, event handler scripts and more.
+    supported platforms, and since then it has grown into a much more capable tool. It now
+    supports configuration files for breakpoints, event handler scripts and more.
+
+    We have included several working examples with Nerve so that you aren't lost the first
+    time you try it. If you develop some useful scripts with it let us know and we can make
+    them part of the default package.
 
 ## Supported Platforms
 
     Nerve is supported and has been tested on the following platforms:
 
     Windows 7
-    Windows XP
-    Linux Ubuntu 10.4
-    Linux Ubuntu 9.10
+    Windows XP SP3
+    Ubuntu Linux 10.4
+    Ubuntu Linux 9.10
     Mac OS X 10.6
     Mac OS X 10.5
 
@@ -34,18 +38,18 @@
 
 ## Features
 
-    - Cross platform (see above)
+    - Cross platform
     - Easy configuration files you can write by hand or generate using our tools
     - Run Ruby scripts with full access to the debugger when breakpoints are hit
     - Run Ruby scripts when specific debugging events occur
-    - Extend Nerve through handlers.rb or output.rb with minimal code
-    - Nerve comes with a few example brekapoint scripts such as hooking RtlAllocateHeap/malloc
+    - Extend Nerve through handlers.rb or output.rb with minimal code changes
+    - Nerve comes with a few example breakpoint scripts such as hooking RtlAllocateHeap/malloc
 
 ## Todo
 
 	Nerve is a simple tool, but we plan to grow it with optional add ons:
 
-    - A waiting mode that runs and polls for new processes matching the target
+    - A waiting mode that runs and polls for new processes matching a target process description
     - Lots of helper scripts for breakpoints such as heap inspection, in memory fuzzing, SSL reads etc...
     - Helper methods and better named instance variables for making breakpoint scripts easier to write
     - Better output such as graphviz, statistics, function arguments etc...
@@ -53,7 +57,7 @@
 	- A basic RubyWX GUI
 	- Redis database support
     - Nerve is also helping us find the areas of Ragweed that need the most improvement
-  
+
 ## Requirements
 
     Nerve has one small dependency. But don't worry, theres no need to install an SQL server
@@ -61,52 +65,52 @@
 
     Ragweed (a cross platform x86 debugger library)
 
-    - git clone http://github.com/tduehr/ragweed.git    (the preferred method)
-    OR
-    - gem install -r ragweed   (you will get an older version)
+    git clone http://github.com/tduehr/ragweed.git    (the preferred method)
+
+    ... OR ...
+
+    gem install -r ragweed   (you might get an older version)
 
     YES, thats it!
 
     If you want to run the bleeding edge stuff we commit to github everyday then I suggest
     checking out the github repositories of both Nerve and Ragweed and executing a 'git pull'
-    before using the tool.
+    before using the tool. But we can't promise it will work perfectly.
 
 ## Usage
 
     $ ruby nerve.rb --help
 
-    Nerve 1.4
+    Nerve 1.5
 
-    -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool)
-    -b, --config_file FILE           Read all breakpoints and handler event configurations from this file
-    -o, --output FILE                Dump all output to a file
-    -f                               Optional flag indicates whether or not to trace forked child processes (Linux only)
+        -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool | -p notepad.exe)
+        -b, --config_file FILE           Read all breakpoints and handler event configurations from this file
+        -o, --output FILE                Dump all output to a file (default is STDOUT)
+        -f                               Optional flag indicates whether or not to trace forked child processes (Linux only)
 
-    Yes, it 'Just Works'! If you want to write more complex tools then I encourage you to look
-    at the ragweed library, or extend Nerve's signal handlers with your own methods.
+## Configuration File Example
 
-## Breakpoint File Example
-
-    Keywords in breakpoint files:
+    Keywords in configuration files:
     (order does not matter)
 
     bp - An address (or a symbolic name for Win32) where the debugger should set a breakpoint
     name - A name describing the breakpoint, typically a symbol or function name
     lib - An optional library name indicating where the symbol can be found, only useful with Linux/OSX
     bpc - Number of times to let this breakpoint hit before uninstalling it
-    code - Location of a script that holds ruby code to be executed when this breakpoint hits    
+    code - Location of a script that holds ruby code to be executed when this breakpoint hits
+    nargs - The number of arguments the function takes (only used with Win32 right now)
 
     --
 
-    Win32 Configuration:
+    Win32 Configuration Example:
     bp=0x12345678, name=SomeFunction, bpc=2, code=scripts/SomeFunctionAnalysis.rb
     bp=kernel32!CreateFileW, name=CreateFileW, code=scripts/CreateFileW_Analysis.rb
 
-    Linux Configuration:
+    Linux Configuration Example:
     bp=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1, code=scripts/ncurses_trace.rb
     name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40 code=scripts/malloc_linux.rb
 
-    OS X Configuration:
+    OS X Configuration Example:
     bp=0x12345678, name=function_name, bpc=6
 
 ## Breakpoint Scripts
@@ -115,7 +119,7 @@
     can be specified using the 'code=' keyword in your Nerve configuration file (see above).
     These scripts run within the scope of Nerve and the Ragweed breakpoint. This means your scripts
     have access to all the helper methods and instance variables Ragweed makes available. Documenting
-    each of these is going to take a bit of time.
+    each of these is going to take a bit of time but heres some stuff you can start with.
 
     Helper Methods:
 
@@ -170,7 +174,7 @@
     on_stop
     on_unload_dll
 
-    This example will run the My_OnLoad_DLL.rb script whenever the Load DLL debug event occurs:
+    This example will run the My_OnLoad_DLL.rb script whenever the LOAD_DLL debug event occurs:
 
     on_load_dll=scripts/My_OnLoad_DLL.rb
 
@@ -178,7 +182,7 @@
 
     Heres some example output from Nerve running on Ubuntu:
 
-    chris@ubuntu:/# ruby nerve.rb -b example_breakpoint_files/generic_ubuntu_910_libc_trace.txt -p test
+    chris@ubuntu:/# ruby nerve.rb -b example_configuration_files/generic_ubuntu_910_libc_trace.txt -p test
     Nerve ...
     Setting breakpoint: [ 0x0964f40, malloc /lib/tls/i686/cmov/libc-2.11.1.so ]
     Setting breakpoint: [ 0x08055590, mp_add ]
@@ -198,7 +202,7 @@
     ... Done!
 
     Here is Nerve running on Windows 7 and debugging an example program that calls HeapAlloc. For
-    this test program we want to run a simple ruby script each time HeapAlloc is entered and exited.
+    this test program we want to run a simple ruby script each time we enter and leave HeapAlloc()
 
     Test Program:
 
@@ -243,7 +247,7 @@
 
     Below is the output of hooking the malloc.exe program:
 
-    PS C:\My Dropbox\Nerve> ruby .\nerve.rb -p malloc.exe -b .\example_breakpoint_files\Win32_notepad.txt
+    PS C:\My Dropbox\Nerve> ruby .\nerve.rb -p malloc.exe -b .\example_configuration_files\Win32_notepad.txt
     Nerve ...
     Setting breakpoint: [ ntdll!RtlAllocateHeap, RtlAllocateHeap ]
     Size requested 1024
@@ -258,7 +262,7 @@
     Size requested 24
     Heap handle is @ 470000
     Heap chunk returned @ 47f640
-    -----------------------------------------------------------------------
+
     CONTEXT:
     EIP: 77b564f4
 
@@ -278,8 +282,8 @@
 
 ## Who
 
-Nerve was written by Chris Rohlf, and is also developed by Alex Rad
+Nerve was written by Chris Rohlf and is also developed by Alex Rad
 
 Ragweed was written by Thomas Ptacek, ported to OSX by Timur Duehr and ported to Linux by Chris Rohlf
 
-Thanks to the Matasano team and a few other individuals for providing feedback and ideas
+Thanks to the www.Matasano.com team and a few other individuals for providing feedback and ideas

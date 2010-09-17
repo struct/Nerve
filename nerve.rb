@@ -60,7 +60,8 @@ class Nerve
                     @pid = @pid.to_i
                 end
 
-                @so = NerveLinux.procparse(@pid)
+                @so = NerveLinux.shared_libraries(@pid)
+                
                 parse_config_file(bp_file)
 
                 @threads = NerveLinux.threads(@pid)
@@ -154,7 +155,7 @@ class Nerve
                             analyze(o)
                         end
 
-                        if !o.bpc.nil? and o.hits.to_i > o.bpc.to_i
+                        if !o.bpc.nil? and o.hits.to_i >= o.bpc.to_i
                             r = @ragweed.breakpoint_clear(ctx.eip-1)
                             o.flag = false
                         end

@@ -10,12 +10,12 @@ bp=kernel32!WriteFile, name=WriteFile
 ; Load a deferred breakpoint
 ; Use the fonts menu to trigger
 ; Tested on Win7 only!
-;bp=fms.dll!0x2328, name=FMS
+bp=fms.dll!0x2328, name=FMS
 
 ; Load a deferred breakpoint
 ; Use the Print menu to trigger
 ; Tested on WinXP SP3 only!
-bp=mscms!0x2a10, name=MSCMS
+;bp=mscms!0x2a10, name=MSCMS
 
 ; This script will load whenever a new DLL/module is loaded
 on_load_dll=scripts/on_load_dll.rb

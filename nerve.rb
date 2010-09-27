@@ -118,7 +118,7 @@ class Nerve
             @ragweed.install_bps
 
             if NERVE_OPTS[:fork] == true and RUBY_PLATFORM =~ LINUX_OS
-                @ragweed.set_options(@ragweed::Wraptux::Ptrace::SetOptions::TRACEFORK)
+                @ragweed.set_options(Ragweed::Wraptux::Ptrace::SetOptions::TRACEFORK)
             end
 
             @ragweed.continue

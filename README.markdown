@@ -165,6 +165,7 @@
     on_priv_instruction
     on_rip
     on_segv
+    on_sigchild
     on_signal
     on_sigstop
     on_sigterm
@@ -192,13 +193,13 @@
     Setting breakpoint: [ 0x09b2de0, read /lib/tls/i686/cmov/libc-2.11.1.so ]
     Setting breakpoint: [ 0x09b2e60, write /lib/tls/i686/cmov/libc-2.11.1.so ]
     ^CDumping stats
-    0x0a3cf40 - malloc | 5279 hit(s)
-    0x08055590 - mp_add | 0 hit(s)
-    0x0a49830 - wmemcpy | 0 hit(s)
-    0x0a41f20 - memcpy | 0 hit(s)
-    0x0a3ce60 - free | 8385 hit(s)
-    0x0a8ade0 - read | 0 hit(s)
-    0x0a8ae60 - write | 0 hit(s)
+    0x0a3cf40 - malloc | 5279
+    0x08055590 - mp_add | 0
+    0x0a49830 - wmemcpy | 0
+    0x0a41f20 - memcpy | 0
+    0x0a3ce60 - free | 8385
+    0x0a8ade0 - read | 0
+    0x0a8ae60 - write | 0
     ... Done!
 
     Here is Nerve running on Windows 7 and debugging an example program that calls HeapAlloc. For
@@ -278,7 +279,7 @@
     Dumping stats
     Pid is 3224
     Tid is 4048
-    ntdll!RtlAllocateHeap - RtlAllocateHeap | 4 hit(s)
+    ntdll!RtlAllocateHeap - RtlAllocateHeap | 4
 
 ## Who
 

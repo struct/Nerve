@@ -41,9 +41,8 @@ when RUBY_PLATFORM =~ WINDOWS_OS
             log.str "Tid is #{ev.tid}"
 
             bps.each do |o|
-                log.str "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
+                log.str "#{o.addr} - #{o.name} | #{o.hits}"
             end
-exit
         end
 
         def on_access_violation(ev)
@@ -159,7 +158,7 @@ when RUBY_PLATFORM =~ LINUX_OS
         def dump_stats
             log.str "Dumping stats"
             bps.each do |o|
-                log.str "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
+                log.str "#{o.addr} - #{o.name} | #{o.hits}"
             end
         end
 
@@ -167,6 +166,11 @@ when RUBY_PLATFORM =~ LINUX_OS
             @pid = pid
             exec_eh_script("on_fork_child")
             log.str "Parent process forked a child with pid #{pid}"
+        end
+
+        def on_sigchild
+            exec_eh_script("on_sigchild")
+            log.str "Forked a child process"
         end
 
         def on_sigterm
@@ -266,7 +270,7 @@ when RUBY_PLATFORM =~ OSX_OS
         def dump_stats
             log.str "Dumping stats"
             bps.each do |o|
-                log.str "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
+                log.str "#{o.addr} - #{o.name} | #{o.hits}"
             end
         end
 

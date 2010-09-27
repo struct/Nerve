@@ -191,7 +191,7 @@ class Nerve
         log.str "Dumping breakpoint stats ..."
         @bps.each do |o|
             if o.addr != 0
-                log.str "#{o.addr} - #{o.name} | #{o.hits} hit(s)"
+                log.str "#{o.addr} - #{o.name} | #{o.hits}"
             end
         end
     end

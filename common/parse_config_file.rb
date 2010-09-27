@@ -8,8 +8,8 @@ class Nerve
                     on_create_process on_create_thread on_detach on_divide_by_zero on_exit on_exit_process
                     on_exit_thread on_fork_child on_illegalinst on_int_overflow on_invalid_disposition
                     on_invalid_handle on_load_dll on_output_debug_string on_priv_instruction on_rip on_segv
-                    on_signal on_sigstop on_sigterm on_sigtrap on_single_step on_stack_overflow on_stop
-                    on_unload_dll ]
+                    on_signal on_sigstop on_sigchild on_sigterm on_sigtrap on_single_step on_stack_overflow
+                    on_stop on_unload_dll ]
 
         lines = fd.readlines
         lines.map { |x| x.chomp }

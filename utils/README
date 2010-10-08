@@ -1,0 +1,5 @@
+These optional utilities you can use to generate Nerve configuration files and
+generally make your life easier. But beware they have dependencies such as:
+
+http://github.com/struct/relf
+http://github.com/struct/rupe

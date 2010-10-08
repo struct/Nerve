@@ -14,20 +14,21 @@ require 'common/common'
 require 'common/constants'
 
 class Nerve
-    attr_accessor :ragweed, :pid, :threads, :bps, :so, :log, :event_handlers
+    attr_accessor :opts, :ragweed, :pid, :threads, :bps, :so, :log, :event_handlers
 
-    def initialize(pid, bp_file)
-        @pid = pid
+    def initialize(opts)
+        @opts = opts
+        @pid = opts[:pid]
         @bps = Array.new
         @event_handlers = Hash.new
         @threads = Array.new
-        @out = NERVE_OPTS[:out]
+        @out = opts[:out]
         @log = NerveLog.new(@out)
 
         case
             when RUBY_PLATFORM =~ WINDOWS_OS
 
-                parse_config_file(bp_file)
+                parse_config_file(opts[:bp_file])
 
                 if @pid.kind_of?(String) and @pid.to_i == 0
                     @ragweed = NerveWin32.find_by_regex(/#{@pid}/)
@@ -62,18 +63,18 @@ class Nerve
 
                 @so = NerveLinux.shared_libraries(@pid)
                 
-                parse_config_file(bp_file)
+                parse_config_file(opts[:bp_file])
 
                 @threads = NerveLinux.threads(@pid)
                 self.which_threads
 
-                opts = {}
+                lo = {}
 
-                if NERVE_OPTS[:fork] == true
-                    opts[:fork] = true
+                if opts[:fork] == true
+                    lo[:fork] = true
                 end
 
-                @ragweed = NerveLinux.new(@pid, opts)
+                @ragweed = NerveLinux.new(@pid, lo)
 
                 if @ragweed.nil?
                     puts "Failed to find process: #{@pid}"
@@ -84,7 +85,7 @@ class Nerve
 
             when RUBY_PLATFORM =~ OSX_OS
 
-                parse_config_file(bp_file)
+                parse_config_file(opts[:bp_file])
 
                 if @pid.kind_of?(String) and @pid.to_i.nil?
                     @pid = NerveOSX.find_by_regex(/#{@pid}/)
@@ -117,7 +118,7 @@ class Nerve
         if RUBY_PLATFORM !~ WINDOWS_OS
             @ragweed.install_bps
 
-            if NERVE_OPTS[:fork] == true and RUBY_PLATFORM =~ LINUX_OS
+            if opts[:fork] == true and RUBY_PLATFORM =~ LINUX_OS
                 @ragweed.set_options(Ragweed::Wraptux::Ptrace::SetOptions::TRACEFORK)
             end
 
@@ -126,7 +127,7 @@ class Nerve
 
         trap("INT") do
             @ragweed.uninstall_bps if RUBY_PLATFORM !~ WINDOWS_OS
-            dump_stats
+            @ragweed.dump_stats
             log.finalize
             exit
         end
@@ -137,7 +138,7 @@ class Nerve
 
         ## We shouldn't reach this but if we
         ## do we still want to see bp stats
-        self.dump_stats
+        @ragweed.dump_stats
     end
 
     def set_breakpoints
@@ -162,7 +163,7 @@ class Nerve
                     end
 
                 when RUBY_PLATFORM =~ LINUX_OS, RUBY_PLATFORM =~ OSX_OS
-                    @ragweed.breakpoint_set(o.addr.to_i(16), o.name, (bpl = lambda do 
+                    @ragweed.breakpoint_set(o.addr.to_i(16), o.name, (bpl = proc do 
                         if !o.code.nil?
                             eval(o.code)
                         end
@@ -183,18 +184,6 @@ class Nerve
         #log.hit(o.addr, o.name)
         o.hits = o.hits.to_i + 1
     end
-
-    ## This dump_stats differs from the one
-    ## in handlers.rb. This is because its
-    ## called when the user hits Ctrl+C
-    def dump_stats
-        log.str "Dumping breakpoint stats ..."
-        @bps.each do |o|
-            if o.addr != 0
-                log.str "#{o.addr} - #{o.name} | #{o.hits}"
-            end
-        end
-    end
 end
 
 NERVE_OPTS = {
@@ -205,7 +194,7 @@ NERVE_OPTS = {
 }
 
 opts = OptionParser.new do |opts|
-    opts.banner = "\nNerve 1.5\n\n"
+    opts.banner = "\nNerve #{NERVE_VERSION}\n\n"
 
     opts.on("-p", "--pid PID/Name", "Attach to this pid OR process name (ex: -p 12345 | -p gcalctool | -p notepad.exe)") do |o|
         NERVE_OPTS[:pid] = o
@@ -237,5 +226,5 @@ end
 ## Never is still under heavy development
 ## we want to see gross errors for now
 #begin
-    w = Nerve.new(NERVE_OPTS[:pid], NERVE_OPTS[:bp_file])
+    w = Nerve.new(NERVE_OPTS)
 #rescue; end

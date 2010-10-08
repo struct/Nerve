@@ -20,6 +20,7 @@ when RUBY_PLATFORM =~ WINDOWS_OS
             @log = l
         end
 
+        def save_opts(opts) @opts = opts; end
         def save_bps(b) @bps = b; end
         def save_threads(t) @threads = t; end
         def save_handlers(h) @event_handlers = h end
@@ -33,15 +34,19 @@ when RUBY_PLATFORM =~ WINDOWS_OS
             end
         end
 
-        def dump_stats(ev)
-            a = self.context(ev)
-            log.str a.dump
-            log.str "Dumping stats"
-            log.str "Pid is #{ev.pid}"
-            log.str "Tid is #{ev.tid}"
+        def dump_stats(ev=nil)
+            if !ev.nil?
+                a = self.context(ev)
+                log.str a.dump
+                log.str "Dumping stats"
+                log.str "Pid is #{ev.pid}"
+                log.str "Tid is #{ev.tid}"
+            end
 
             bps.each do |o|
-                log.str "#{o.addr} - #{o.name} | #{o.hits}"
+                if o.hits > 0
+                    log.str "#{o.addr} - #{o.name} | #{o.hits}"
+                end
             end
         end
 
@@ -144,6 +149,7 @@ when RUBY_PLATFORM =~ LINUX_OS
             @log = l
         end
 
+        def save_opts(opts) @opts = opts; end
         def save_bps(b) @bps = b; end
         def save_threads(t) @threads = t; end
         def save_handlers(h) @event_handlers = h end
@@ -158,7 +164,9 @@ when RUBY_PLATFORM =~ LINUX_OS
         def dump_stats
             log.str "Dumping stats"
             bps.each do |o|
-                log.str "#{o.addr} - #{o.name} | #{o.hits}"
+                if o.hits > 0
+                    log.str "#{o.addr} - #{o.name} | #{o.hits}"
+                end
             end
         end
 
@@ -256,6 +264,7 @@ when RUBY_PLATFORM =~ OSX_OS
             @log = l
         end
 
+        def save_opts(opts) @opts = opts; end
         def save_bps(b) @bps = b; end
         def save_threads(t) @threads = t; end
         def save_handlers(h) @event_handlers = h end
@@ -270,7 +279,9 @@ when RUBY_PLATFORM =~ OSX_OS
         def dump_stats
             log.str "Dumping stats"
             bps.each do |o|
-                log.str "#{o.addr} - #{o.name} | #{o.hits}"
+                if o.hits > 0
+                    log.str "#{o.addr} - #{o.name} | #{o.hits}"
+                end
             end
         end
 

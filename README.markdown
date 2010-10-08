@@ -32,9 +32,8 @@
     Mac OS X 10.6
     Mac OS X 10.5
 
-    At this time only Ruby 1.8.x has been tested. We are actively investigating both 64 bit
-    support for each platform and support for Ruby 1.9.x. Unfortunately both of these things
-    require changes to Ragweed. If you have any interest in helping with this, let us know!
+    Ruby 1.8.7
+    Ruby 1.9.x
 
 ## Features
 
@@ -71,6 +70,10 @@
 
     gem install -r ragweed   (you might get an older version)
 
+    Ragweed requires FFI which you install with rubygems:
+
+    gem install -r ffi
+
     YES, thats it!
 
     If you want to run the bleeding edge stuff we commit to github everyday then I suggest
@@ -81,7 +84,7 @@
 
     $ ruby nerve.rb --help
 
-    Nerve 1.5
+    Nerve 1.6
 
         -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool | -p notepad.exe)
         -b, --config_file FILE           Read all breakpoints and handler event configurations from this file

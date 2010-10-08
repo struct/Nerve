@@ -1,21 +1,10 @@
-# requires rbdasm from libdasm
-#
-#  Usage: blah.rb /bin/ls
-#
-#  Output: all block branches/entry points to set breakpoints on.
-#
-#
-# There are some highly specific libdasm things in here
-# Mainly, when grabbing an immediate value is it relative 
-# or absolute? Ideally any disassembler lib would have a helper
-# function that given an opcode and a program counter gives you
-# the possible destinations for immediate-only instructions.
-#
-# http://code.google.com/p/libdasm/downloads/detail?name=libdasm-beta.zip
+# Requires: rbdasm from libdasm / Ruby 1.8.7
+# Usage: windows-blocks-dasm.rb SomeBin.exe
+# Output: A Nerve configuration file for all branch/entry points
+
 require 'dasm'
 require 'relf'
 require 'rubygems'
-require 'ragweed'
 require 'set'
 
 if !ARGV[0]
@@ -23,6 +12,7 @@ if !ARGV[0]
 	exit
 end
 
+text = String.new
 d = RELF.new(ARGV[0])
 d.parse_dynsym
 d.parse_symtab
@@ -31,7 +21,7 @@ d.parse_reloc
 d.shdr.each do |s|
     if d.get_shdr_name(s) =~ /.text/
         file = File.open(ARGV[0]).read
-        $text = file[s.sh_offset.to_i, s.sh_size.to_i]
+        text = file[s.sh_offset.to_i, s.sh_size.to_i]
         @shdr = s
     end
 end
@@ -45,9 +35,9 @@ op_imm = Dasm::Operand::Type::Immediate
 bps = Set.new
 
 start = false
-dasm.disassemble($text) do |instruction, offset|
+dasm.disassemble(text) do |instruction, offset|
  
-  if branches.include? instruction.type:
+  if branches.include? instruction.type
     pc = offset+@shdr.sh_addr
  
     if instruction.op1 and instruction.op1.type == op_imm
@@ -56,9 +46,6 @@ dasm.disassemble($text) do |instruction, offset|
       
       bps.add( [branchdest, branchdest-@shdr.sh_addr] )
       bps.add( [branchdest2, branchdest2-@shdr.sh_addr] )
-#      puts branchdest.to_hex
-#      puts branchdest2.to_hex     
-#      puts "0x%.8x: #{instruction}" % (offset+@shdr.sh_addr)
     end 
   end
 end

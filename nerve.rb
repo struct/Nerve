@@ -194,7 +194,7 @@ NERVE_OPTS = {
 }
 
 opts = OptionParser.new do |opts|
-    opts.banner = "\nNerve #{NERVE_VERSION}\n\n"
+    opts.banner = "\nNerve #{NERVE_VERSION} | Chris Rohlf 2009/2010\n\n"
 
     opts.on("-p", "--pid PID/Name", "Attach to this pid OR process name (ex: -p 12345 | -p gcalctool | -p notepad.exe)") do |o|
         NERVE_OPTS[:pid] = o
@@ -210,7 +210,7 @@ opts = OptionParser.new do |opts|
 
     ## FIX: Port this feature when Ragweed is ready
     if RUBY_PLATFORM =~ LINUX_OS
-        opts.on("-f", "Optional flag indicates whether or not to trace forked child processes (Linux only)\n\n") do |o|
+        opts.on("-f", "Optional flag indicates whether or not to trace forked child processes (Linux only)") do |o|
             NERVE_OPTS[:fork] = true
         end
     end

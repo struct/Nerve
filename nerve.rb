@@ -3,6 +3,8 @@
 ## Nerve is a scriptable debugger built on Ragweed
 ## Please refer to the README file for more information
 
+$: << File.dirname('..')
+
 require 'rubygems'
 require 'ragweed'
 require 'optparse'
@@ -111,7 +113,11 @@ class Nerve
         @ragweed.attach if RUBY_PLATFORM !~ WINDOWS_OS
 
         self.set_breakpoints
-        log.str "#{@bps.size} Breakpoints set ..."
+
+        bp_count = 0
+        @bps.each {|o| bp_count+=1 if o.flag == true }
+
+        log.str "#{bp_count} Breakpoints set ..."
 
         @ragweed.save_bps(@bps)
 
@@ -143,6 +149,12 @@ class Nerve
 
     def set_breakpoints
         @bps.each do |o|
+
+            if o.addr.nil?
+                o.flag = false
+                next
+            end
+ 
             log.str "Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib} ]"
 
             case
@@ -173,7 +185,7 @@ class Nerve
                         if o.hits.to_i > o.bpc.to_i
                             o.flag = false
                             r = @ragweed.get_registers
-                            #@ragweed.breakpoint_clear(r[:eip]-1)
+                            #@ragweed.breakpoint_clear(r.eip-1)
                         end
                     end ))
             end

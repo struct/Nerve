@@ -1,15 +1,14 @@
 ## Get and print the register states
 ## Read the size argument to malloc
 ## Search the heap buffer for a DWORD
-
-r = @ragweed.get_registers
+regs = @ragweed.get_registers
 
 puts "-----------------"
 #puts sprintf "eax = %08x\nebx = %08x\necx = %08x\nedx = %08x\nesp = %08x\nebp = %08x\neip = %08x\n",
-#    r[:eax], r[:ebx], r[:ecx], r[:edx], r[:esp], r[:ebp], r[:eip]
+#    regs.eax, regs.ebx, regs.ecx, regs.edx, regs.esp, regs.ebp, regs.eip
 @ragweed.print_registers
 
-esp = Ragweed::Wraptux::ptrace(Ragweed::Wraptux::Ptrace::PEEK_TEXT, @pid, r[:esp]+4, 0)
+esp = Ragweed::Wraptux::ptrace(Ragweed::Wraptux::Ptrace::PEEK_TEXT, @pid, regs.esp+4, 0)
 @log.str "malloc(#{esp})"
 
 #locs = @ragweed.search_process(0x41414141)

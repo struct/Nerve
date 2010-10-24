@@ -15,13 +15,15 @@ d = RELF.new(ARGV[0])
 m = ARGV[1]
 
 d.parse_dynsym do |sym|
-    if d.get_dyn_symbol_name(sym).match(/#{m}/) and d.get_symbol_type(sym) =~ /FUNC/i and sym.st_value.to_i != 0
-       puts sprintf("bp=0x%08x, name=%s\n", sym.st_value.to_i, d.get_dyn_symbol_name(sym))
+    n = d.get_dyn_symbol_name(sym)
+    if n.match(/#{m}/i) and d.get_symbol_type(sym).match(/FUNC/i) and sym.st_value.to_i != 0
+       puts sprintf("bp=0x%08x, name=%s\n", sym.st_value.to_i, n)
     end
 end
 
 d.parse_symtab do |sym|
-    if d.get_sym_symbol_name(sym).match(/#{m}/) and d.get_symbol_type(sym) =~ /FUNC/i and sym.st_value.to_i != 0
-        puts sprintf("bp=0x%08x, name=%s\n", sym.st_value.to_i, d.get_sym_symbol_name(sym))
+    n = d.get_sym_symbol_name(sym)
+    if n.match(/#{m}/i) and d.get_symbol_type(sym).match(/FUNC/i) and sym.st_value.to_i != 0
+        puts sprintf("bp=0x%08x, name=%s\n", sym.st_value.to_i, n)
     end
 end

@@ -9,6 +9,8 @@
     http://chargen.matasano.com/chargen/2009/8/27/ruby-for-pentesters-the-dark-side-i-ragweed.html
 
     Nerve can be a dynamic hit tracer, an in memory fuzzer or a simple scriptable debugger.
+    All you need to do is give it a configuration file telling it what breakpoints to
+    set, events to hook and what ruby scripts to execute when it happens.
 
     Nerve showcases the best part about Ragweed: cross platform debugging. I originally
     wrote Nerve as a small Ragweed script that kept stats on the functions my fuzzers

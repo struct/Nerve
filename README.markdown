@@ -288,7 +288,7 @@
 
 ## Who
 
-Nerve was written by Chris Rohlf and is also developed by Alex Rad
+Nerve was written by Chris Rohlf with contributions from AlexRad and Timur Duehr
 
 Ragweed was written by Thomas Ptacek, ported to OSX by Timur Duehr and ported to Linux by Chris Rohlf
 

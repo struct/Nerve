@@ -10,7 +10,7 @@ bp=kernel32!WriteFile, name=WriteFile
 ; Load a deferred breakpoint
 ; Use the fonts menu to trigger
 ; Tested on Win7 only!
-bp=fms.dll!0x2328, name=FMS
+;bp=fms.dll!0x2328, name=FMS
 
 ; Load a deferred breakpoint
 ; Use the Print menu to trigger

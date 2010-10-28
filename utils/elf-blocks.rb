@@ -1,5 +1,4 @@
-# Requires: rbdasm from libdasm / Ruby 1.8.7
-# Usage: windows-blocks-dasm.rb SomeBin.exe
+# Requires: rbdasm from libdasm (Ruby 1.8.7) and http://github.com/struct/relf
 # Output: A Nerve configuration file for all branch/entry points
 
 require 'dasm'
@@ -7,10 +6,12 @@ require 'relf'
 require 'rubygems'
 require 'set'
 
-if !ARGV[0]
-	puts "need a file!"
+if !ARGV[1]
+	puts "ruby elf-blocks.rb <binary> <output>"
 	exit
 end
+
+output = ARGV[1]
 
 text = String.new
 d = RELF.new(ARGV[0])
@@ -27,17 +28,17 @@ d.shdr.each do |s|
 end
 
 dasm = Dasm.new
-branches = [#Dasm::Instruction::Type::JMP, 
-            #Dasm::Instruction::Type::JMPC, 
-             Dasm::Instruction::Type::CALL]
+branches = [Dasm::Instruction::Type::JMP, 
+            Dasm::Instruction::Type::JMPC, 
+            Dasm::Instruction::Type::CALL]
 op_imm = Dasm::Operand::Type::Immediate
 
 bps = Set.new
 
 start = false
 dasm.disassemble(text) do |instruction, offset|
- 
   if branches.include? instruction.type
+	puts "Branch: #{instruction.to_s}"
     pc = offset+@shdr.sh_addr
  
     if instruction.op1 and instruction.op1.type == op_imm
@@ -51,16 +52,21 @@ dasm.disassemble(text) do |instruction, offset|
 end
 
 x = Hash.new
+
 for sym in d.dynsym_symbols
   x[sym.st_value.to_i] = d.get_dyn_symbol_name(sym)
 end
 
+puts "Writing output file to #{output}"
+
+file = File.open(output, "w+")
+
 bps.each do |b|
-  out = "bp=#{b[0].to_hex}, name=call_"
+  out = "bp=#{b[0].to_hex}, name=block_"
   if x.include? b[0]
     out += "#{x[b[0]]}"
   else
     out += "#{b[1]}"
   end
-  puts out
+  file.puts out
 end

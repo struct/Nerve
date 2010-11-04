@@ -2,7 +2,7 @@
 
 def mutate(data, len)
     s = rand(len-1)
-	data[s] = rand(255)
+	data[s] = rand(255).pack('i')
 	return data
 end
 

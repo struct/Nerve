@@ -1,0 +1,5 @@
+- once we have a print_registers in debuggerosx fix the handlers for osx
+- dump_stats is ugly, rename it
+- finish aslr_check.rb !
+- threads return and ostruct, does it still work this way?! make it work!
+- human and machine readable output

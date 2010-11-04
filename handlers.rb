@@ -184,7 +184,8 @@ when RUBY_PLATFORM =~ LINUX_OS
         def on_sigterm
             log.str "Process Terminated!"
             exec_eh_script("on_sigterm")
-            self.print_regs
+            ## This need to be implemented in debuggerosx
+            #self.print_registers
             dump_stats
             exit
         end
@@ -192,7 +193,8 @@ when RUBY_PLATFORM =~ LINUX_OS
         def on_segv
             log.str "Segmentation Fault!"
             exec_eh_script("on_segv")
-            self.print_registers
+            ## This need to be implemented in debuggerosx
+            ##self.print_registers
             dump_stats
             exit
         end
@@ -283,6 +285,14 @@ when RUBY_PLATFORM =~ OSX_OS
                     log.str "#{o.addr} - #{o.name} | #{o.hits}"
                 end
             end
+        end
+
+        def on_sigsegv
+            log.str "Segmentation Fault!"
+            exec_eh_script("on_sigsegv")
+            self.print_regs
+            dump_stats
+            exit
         end
 
         def on_sigterm

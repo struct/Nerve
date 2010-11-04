@@ -35,7 +35,7 @@ class Nerve
                 if @pid.kind_of?(String) and @pid.to_i == 0
                     @ragweed = NerveWin32.find_by_regex(/#{@pid}/)
                 else
-                    @ragweed = NerveWin32.new(@pid.to_i, log)
+                    @ragweed = NerveWin32.new(@pid.to_i)
                 end
 
                 if @ragweed.nil?

@@ -29,12 +29,12 @@ class Nerve
               end
             end
 
-            o = OpenStruct.new
-            o.base = 0
-			o.flag = true
-			o.hits = 0
-            o.bpc = nil
-            o.nargs = 0
+            bp = OpenStruct.new
+            bp.base = 0
+			bp.flag = true
+			bp.hits = 0
+            bp.bpc = nil
+            bp.nargs = 0
 
             r = tl.split(",")
 
@@ -43,54 +43,54 @@ class Nerve
             r.each do |e|
                 if e.match(/bp=/)
                     addr = e.split("bp=").last
-                    o.addr = addr.gsub(/[\s\n]+/, "")
+                    bp.addr = addr.gsub(/[\s\n]+/, "")
                 end
 
                 if e.match(/name=/)
                     name = e.split("name=").last
-                    o.name = name.gsub(/[\s\n]+/, "")
+                    bp.name = name.gsub(/[\s\n]+/, "")
                 end
 
                 if e.match(/bpc=/)
                     bpc = e.split("bpc=").last
-                    o.bpc = bpc.to_i
+                    bp.bpc = bpc.to_i
                 end
 
                 if e.match(/bpc=/)
                     nargs = e.split("nargs=").last
-                    o.nargs = nargs.to_i
+                    bp.nargs = nargs.to_i
                 end
 
                 if e.match(/code=/)
                     code = e.split("code=").last
                     c = code.gsub(/[\s\n]+/, "")
                     r = File.read(c)
-                    o.code = r
+                    bp.code = r
                 end
 
                 if e.match(/lib=/)
                     lib = e.split("lib=").last
-                    o.lib = lib.gsub(/[\s\n]+/, "")
+                    bp.lib = lib.gsub(/[\s\n]+/, "")
 
                     ## TODO - addr must already be parsed
                     ## for this to work correctly
                     if RUBY_PLATFORM =~ LINUX_OS
                         so.each_pair do |k,v|
-                            if v =~ /#{o.lib}/
-                                o.base = k
+                            if v =~ /#{bp.lib}/
+                                bp.base = k
                             end
                         end
                     end
                 end
             end
 
-            if o.base != 0
-                o.addr = o.base.to_i(16)+o.addr.to_i(16)
-                o.addr = sprintf("0x0%x", o.addr)
+            if bp.base != 0
+                bp.addr = bp.base.to_i(16)+bp.addr.to_i(16)
+                bp.addr = sprintf("0x0%x", bp.addr)
             end
 
-            o.hits = 0
-            bps.push(o)
+            bp.hits = 0
+            breakpoints.push(bp)
         end
     end
 end

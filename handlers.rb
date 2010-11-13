@@ -9,7 +9,7 @@ case
 when RUBY_PLATFORM =~ WINDOWS_OS
     class NerveWin32 < Ragweed::Debugger32
 
-        attr_accessor :log, :pid, :bps, :threads, :event_handlers
+        attr_accessor :log, :pid, :nerve_breakpoints, :threads, :event_handlers
 
         def initialize(pid)
             @pid = pid
@@ -21,7 +21,7 @@ when RUBY_PLATFORM =~ WINDOWS_OS
         end
 
         def save_opts(opts) @opts = opts; end
-        def save_bps(b) @bps = b; end
+        def save_breakpoints(b) @nerve_breakpoints = b; end
         def save_threads(t) @threads = t; end
         def save_handlers(h) @event_handlers = h end
 
@@ -38,14 +38,12 @@ when RUBY_PLATFORM =~ WINDOWS_OS
             if !ev.nil?
                 a = self.context(ev)
                 log.str a.dump
-                log.str "Dumping stats"
                 log.str "Pid is #{ev.pid}"
                 log.str "Tid is #{ev.tid}"
             end
-
-            bps.each do |o|
-                if o.hits > 0
-                    log.str "#{o.addr} - #{o.name} | #{o.hits}"
+            nerve_breakpoints.each do |bp|
+                if bp.hits > 0
+                    log.str "#{bp.addr} - #{bp.name} | #{bp.hits}"
                 end
             end
         end
@@ -138,7 +136,7 @@ when RUBY_PLATFORM =~ WINDOWS_OS
 when RUBY_PLATFORM =~ LINUX_OS
     class NerveLinux < Ragweed::Debuggertux
 
-        attr_accessor :log, :pid, :bps, :threads
+        attr_accessor :log, :pid, :nerve_breakpoints, :threads
 
         def initialize(pid, opts)
             @pid = pid
@@ -150,7 +148,7 @@ when RUBY_PLATFORM =~ LINUX_OS
         end
 
         def save_opts(opts) @opts = opts; end
-        def save_bps(b) @bps = b; end
+        def save_breakpoints(b) @nerve_breakpoints = b; end
         def save_threads(t) @threads = t; end
         def save_handlers(h) @event_handlers = h end
 
@@ -162,10 +160,9 @@ when RUBY_PLATFORM =~ LINUX_OS
         end
 
         def dump_stats
-            log.str "Dumping stats"
-            bps.each do |o|
-                if o.hits > 0
-                    log.str "#{o.addr} - #{o.name} | #{o.hits}"
+            nerve_breakpoints.each do |bp|
+                if bp.hits > 0
+                    log.str "#{bp.addr} - #{bp.name} | #{bp.hits}"
                 end
             end
         end
@@ -255,7 +252,7 @@ when RUBY_PLATFORM =~ LINUX_OS
 when RUBY_PLATFORM =~ OSX_OS
     class NerveOSX < Ragweed::Debuggerosx
 
-        attr_accessor :log, :pid, :bps, :threads
+        attr_accessor :log, :pid, :nerve_breakpoints, :threads
 
         def initialize(pid)
             @pid = pid
@@ -267,7 +264,7 @@ when RUBY_PLATFORM =~ OSX_OS
         end
 
         def save_opts(opts) @opts = opts; end
-        def save_bps(b) @bps = b; end
+        def save_breakpoints(b) @nerve_breakpoints = b; end
         def save_threads(t) @threads = t; end
         def save_handlers(h) @event_handlers = h end
 
@@ -279,10 +276,9 @@ when RUBY_PLATFORM =~ OSX_OS
         end
 
         def dump_stats
-            log.str "Dumping stats"
-            bps.each do |o|
-                if o.hits > 0
-                    log.str "#{o.addr} - #{o.name} | #{o.hits}"
+            nerve_breakpoints.each do |bp|
+                if bp.hits > 0
+                    log.str "#{bp.addr} - #{bp.name} | #{bp.hits}"
                 end
             end
         end

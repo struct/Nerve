@@ -1,7 +1,9 @@
 ; Example notepad.exe breakpoint file
 ; Tested on Win7 & WinXP SP3
 
-bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/RtlAllocateHeap.rb, bpc=10
+; The RtlAllocateHeap script should only be used when the -k Nerve flag is used!
+
+bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, bpc=10, code=scripts/RtlAllocateHeap.rb
 bp=kernel32!CreateFileA, name=CreateFileA, bpc=1
 bp=kernel32!DeviceIoControl, name=DeviceIOControl, bpc=3
 bp=kernel32!ReadFile, name=ReadFile

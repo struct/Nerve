@@ -14,14 +14,15 @@ require 'common/parse_config_file'
 require 'common/output'
 require 'common/common'
 require 'common/constants'
+require 'common/helpers'
 
 class Nerve
-    attr_accessor :opts, :ragweed, :pid, :threads, :bps, :so, :log, :event_handlers
+    attr_accessor :opts, :ragweed, :pid, :threads, :breakpoints, :so, :log, :event_handlers
 
     def initialize(opts)
         @opts = opts
         @pid = opts[:pid]
-        @bps = Array.new
+        @breakpoints = Array.new
         @event_handlers = Hash.new
         @threads = Array.new
         @out = opts[:out]
@@ -115,11 +116,11 @@ class Nerve
         self.set_breakpoints
 
         bp_count = 0
-        @bps.each {|o| bp_count+=1 if o.flag == true }
+        @breakpoints.each {|b| bp_count+=1 if b.flag == true }
 
         log.str "#{bp_count} Breakpoints set ..."
 
-        @ragweed.save_bps(@bps)
+        @ragweed.save_breakpoints(@breakpoints)
 
         if RUBY_PLATFORM !~ WINDOWS_OS
             @ragweed.install_bps
@@ -142,59 +143,71 @@ class Nerve
             @ragweed.loop
         end
 
-        ## We shouldn't reach this but if we
-        ## do we still want to see bp stats
-        @ragweed.dump_stats
+        ## This is commented out because the stats should
+        ## have been dumped already if we reached this
+        ## point through some debugger event
+        #@ragweed.dump_stats
     end
 
     def set_breakpoints
-        @bps.each do |o|
+        @breakpoints.each do |bp|
 
-            if o.addr.nil?
-                o.flag = false
+            if bp.addr.nil?
+                bp.flag = false
                 next
             end
  
-            log.str "Setting breakpoint: [ #{o.addr}, #{o.name} #{o.lib} ]"
+            log.str "Setting breakpoint: #{bp.addr}, #{bp.name} #{bp.lib}"
 
             case
                 when RUBY_PLATFORM =~ WINDOWS_OS
-                    @ragweed.hook(o.addr, o.nargs) do |evt, ctx, dir, args|
-                        if !o.code.nil?
-                            eval(o.code)
-                        end
+                    if opts[:hook] == true
+                        @ragweed.hook(bp.addr, bp.nargs) do |evt, ctx, dir, args|
 
-                        if dir.to_s =~ /enter/
-                            analyze(o)
-                        end
+                            if !bp.code.nil?
+                                eval(bp.code)
+                            end
 
-                        if !o.bpc.nil? and o.hits.to_i >= o.bpc.to_i
-                            r = @ragweed.breakpoint_clear(ctx.eip-1)
-                            o.flag = false
+                            if dir.to_s =~ /enter/
+                                bp.hits += 1
+                            end
+
+                            check_bp_max(bp, ctx)
+                        end
+                    else
+                        @ragweed.breakpoint_set(bp.addr) do |evt, ctx|
+                            if !bp.code.nil?
+                                eval(bp.code)
+                            end
+
+                            bp.hits += 1
+                            check_bp_max(bp, ctx)
                         end
                     end
 
                 when RUBY_PLATFORM =~ LINUX_OS, RUBY_PLATFORM =~ OSX_OS
-                    @ragweed.breakpoint_set(o.addr.to_i(16), o.name, (bpl = proc do 
-                        if !o.code.nil?
-                            eval(o.code)
+                    @ragweed.breakpoint_set(bp.addr.to_i(16), bp.name, (bpl = proc do 
+                        if !bp.code.nil?
+                            eval(bp.code)
                         end
 
-                        analyze(o)
+                        bp.hits += 1
 
-                        if o.hits.to_i > o.bpc.to_i
-                            o.flag = false
-                            r = @ragweed.get_registers
-                            #@ragweed.breakpoint_clear(r.eip-1)
+                        if !bp.bpc.nil? and bp.hits.to_i >= bp.bpc.to_i
+                            bp.flag = false
+                            regs = @ragweed.get_registers
+                            @ragweed.breakpoint_clear(regs.eip-1)
                         end
                     end ))
             end
         end
     end
 
-    def analyze(o)
-        #log.hit(o.addr, o.name)
-        o.hits = o.hits.to_i + 1
+    def check_bp_max(bp, ctx)
+        if !bp.bpc.nil? and bp.hits.to_i >= bp.bpc.to_i
+           r = @ragweed.breakpoint_clear(ctx.eip-1)
+           bp.flag = false
+        end
     end
 end
 
@@ -202,6 +215,7 @@ NERVE_OPTS = {
     :pid => 0,
     :bp_file => nil,
     :out => STDOUT,
+    :hook => false,
     :fork => false
 }
 
@@ -218,6 +232,14 @@ opts = OptionParser.new do |opts|
 
     opts.on("-o", "--output FILE", "Dump all output to a file (default is STDOUT)") do |o|
         NERVE_OPTS[:out] = File.open(o, "w") rescue (bail $!)
+    end
+
+    ## FIX: When hook() is available on all three
+    ## platforms this conditional should go away
+    if RUBY_PLATFORM =~ WINDOWS_OS
+        opts.on("-k", "--hook", "Automatically hook the entry and exit of a function call") do |o|
+            NERVE_OPTS[:hook] = true
+        end
     end
 
     ## FIX: Port this feature when Ragweed is ready
@@ -238,5 +260,6 @@ end
 ## Never is still under heavy development
 ## we want to see gross errors for now
 #begin
-    w = Nerve.new(NERVE_OPTS)
-#rescue; end
+    Nerve.new(NERVE_OPTS)
+#rescue
+#end

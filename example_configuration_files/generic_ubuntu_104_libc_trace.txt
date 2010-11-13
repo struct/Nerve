@@ -2,12 +2,16 @@
 ; You can use 'readelf -s' to get the proper address for
 ; a function inside of your shared object.
 ; The order of the parameters does not matter
+; Will only work with 32-bit Ubuntu 10.10
 
-name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40, code=scripts/glibc_malloc.rb
-bp=0x007c830, name=wmemcpy, lib=/lib/tls/i686/cmov/libc-2.11.1.so
-bp=0x0074f20, name=memcpy, lib=/lib/tls/i686/cmov/libc-2.11.1.so
-bp=0x006fe60, name=free, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=1
-bp=0x00bdde0, name=read, lib=/lib/tls/i686/cmov/libc-2.11.1.so
-bp=0x00bde60, name=write, lib=/lib/tls/i686/cmov/libc-2.11.1.so
-;bp=0x08055590, name=mp_add, bpc=10
+bp=0x00070ed0, name=malloc, lib=/lib/libc-2.12.1.so, bpc=5, code=scripts/glibc_malloc.rb
+bp=0x0007da10, name=wmemcpy, lib=/lib/libc-2.12.1.so
+bp=0x00075f10, name=memcpy, lib=/lib/libc-2.12.1.so
+bp=0x00070df0, name=free, lib=/lib/libc-2.12.1.so
+bp=0x000bfea0, name=read, lib=/lib/libc-2.12.1.so
+bp=0x000bff20, name=write, lib=/lib/libc-2.12.1.so
 on_attach=scripts/on_attach.rb
+
+; gcalctool
+;bp=0x0805e800, name=mp_add
+;on_breakpoint=scripts/on_breakpoint.rb

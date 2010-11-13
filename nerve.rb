@@ -237,7 +237,7 @@ opts = OptionParser.new do |opts|
     ## FIX: When hook() is available on all three
     ## platforms this conditional should go away
     if RUBY_PLATFORM =~ WINDOWS_OS
-        opts.on("-k", "--hook", "Automatically hook the entry and exit of a function call") do |o|
+        opts.on("-k", "--hook", "Automatically hook the entry and exit of a function call (Windows only)") do |o|
             NERVE_OPTS[:hook] = true
         end
     end

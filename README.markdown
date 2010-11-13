@@ -29,6 +29,7 @@
 
     Windows 7
     Windows XP SP3
+    Ubuntu Linux 10.10
     Ubuntu Linux 10.4
     Ubuntu Linux 9.10
     Mac OS X 10.6
@@ -86,12 +87,13 @@
 
     $ ruby nerve.rb --help
 
-    Nerve 1.6
+    Nerve 1.7 | Chris Rohlf 2009/2010
 
-        -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool | -p notepad.exe)
-        -b, --config_file FILE           Read all breakpoints and handler event configurations from this file
-        -o, --output FILE                Dump all output to a file (default is STDOUT)
-        -f                               Optional flag indicates whether or not to trace forked child processes (Linux only)
+    -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool | -p notepad.exe)
+    -b, --config_file FILE           Read all breakpoints and handler event configurations from this file
+    -o, --output FILE                Dump all output to a file (default is STDOUT)
+    -k, --hook                       Automatically hook the entry and exit of a function call (Windows only)
+    -f                               Optional flag indicates whether or not to trace forked child processes (Linux only)
 
 ## Configuration File Example
 
@@ -113,7 +115,7 @@
 
     Linux Configuration Example:
     bp=0x12345678, name=function_name, lib=ncurses.so.5.1, bpc=1, code=scripts/ncurses_trace.rb
-    name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40 code=scripts/malloc_linux.rb
+    name=malloc, lib=/lib/tls/i686/cmov/libc-2.11.1.so, bpc=10, bp=0x006ff40, code=scripts/malloc_linux.rb
 
     OS X Configuration Example:
     bp=0x12345678, name=function_name, bpc=6
@@ -285,6 +287,14 @@
     Pid is 3224
     Tid is 4048
     ntdll!RtlAllocateHeap - RtlAllocateHeap | 4
+
+## Disassembly
+
+Ragweed and Nerve do not ship with a disassembly library. We feel that sort of lies outside of the
+scope of a core debugger library. We do however recommend the following Ruby disassembly libraries:
+
+https://github.com/sophsec/ffi-udis86 - FFI UDis86 library
+http://github.com/struct/frasm - A Ruby C extension for distorm64
 
 ## Who
 

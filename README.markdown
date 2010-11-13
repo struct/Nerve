@@ -290,11 +290,11 @@
 
 ## Disassembly
 
-Ragweed and Nerve do not ship with a disassembly library. We feel that sort of lies outside of the
-scope of a core debugger library. We do however recommend the following Ruby disassembly libraries:
+    Ragweed and Nerve do not ship with a disassembly library. We feel that sort of lies outside of the
+    scope of a core debugger library. We do however recommend the following Ruby disassembly libraries:
 
-https://github.com/sophsec/ffi-udis86 - FFI UDis86 library
-http://github.com/struct/frasm - A Ruby C extension for distorm64
+    https://github.com/sophsec/ffi-udis86 - FFI UDis86 library
+    http://github.com/struct/frasm - A Ruby C extension for distorm64
 
 ## Who
 

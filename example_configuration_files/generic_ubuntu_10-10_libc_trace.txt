@@ -2,7 +2,7 @@
 ; You can use 'readelf -s' to get the proper address for
 ; a function inside of your shared object.
 ; The order of the parameters does not matter
-; Will only work with 32-bit Ubuntu 10.10
+; This example will only work with 32-bit Ubuntu 10.10
 
 bp=0x00070ed0, name=malloc, lib=/lib/libc-2.12.1.so, bpc=5, code=scripts/glibc_malloc.rb
 bp=0x0007da10, name=wmemcpy, lib=/lib/libc-2.12.1.so
@@ -12,6 +12,6 @@ bp=0x000bfea0, name=read, lib=/lib/libc-2.12.1.so
 bp=0x000bff20, name=write, lib=/lib/libc-2.12.1.so
 on_attach=scripts/on_attach.rb
 
-; gcalctool
+; gcalctool example
 ;bp=0x0805e800, name=mp_add
 ;on_breakpoint=scripts/on_breakpoint.rb

@@ -145,7 +145,7 @@
 
     Event handler scripts work just like breakpoint file scripts. They have full access to the debugger
     but are triggered when specific debug events occur such as 'on_load_dll'. See handlers.rb for how
-    they are implemented.
+    they are implemented. Some are OS specific and just wont trigger if you are on a different platform.
 
     Keywords for configuration files:
 
@@ -153,6 +153,7 @@
     on_alignment
     on_attach
     on_bounds
+    on_buffer_overrun
     on_breakpoint
     on_continue
     on_create_process
@@ -163,7 +164,9 @@
     on_exit_process
     on_exit_thread
     on_fork_child
-    on_illegalinst
+    on_guard_page
+    on_heap_corruption
+    on_illegal_instruction
     on_int_overflow
     on_invalid_disposition
     on_invalid_handle

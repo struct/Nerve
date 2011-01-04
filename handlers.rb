@@ -100,6 +100,10 @@ when RUBY_PLATFORM =~ WINDOWS_OS
             exec_eh_script("on_unload_dll", ev)
         end
 
+        def on_guard_page(ev)
+            exec_eh_script("on_guard_page", ev)
+        end
+
         def on_alignment(ev)
             exec_eh_script("on_alignment", ev)
         end
@@ -120,8 +124,20 @@ when RUBY_PLATFORM =~ WINDOWS_OS
             exec_eh_script("on_invalid_handle", ev)
         end
 
+        def on_illegal_instruction(ev)
+            exec_eh_script("on_illegal_instruction", ev)
+        end
+
         def on_priv_instruction(ev)
             exec_eh_script("on_priv_instruction", ev)
+        end
+
+        def on_heap_corruption(ev)
+            exec_eh_script("on_heap_corruption", ev)
+        end
+
+        def on_buffer_overrun(ev)
+            exec_eh_script("on_buffer_overrun", ev)
         end
 
         def on_stack_overflow(ev)
@@ -207,9 +223,9 @@ when RUBY_PLATFORM =~ LINUX_OS
             dump_stats
         end
 
-        def on_illegalinst
+        def on_illegal_instruction
             log.str "Illegal Instruction!"
-            exec_eh_script("on_illegalinst")
+            exec_eh_script("on_illegal_instruction")
             dump_stats
         end
 

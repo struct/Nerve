@@ -1,0 +1,9 @@
+; This is how you use Nerve to launch a process for Nerve to debug
+; 'target' keyword is used to specify the debugee
+; 'args' keyword is a string of arguments
+; 'env' keyword is key/value pair of environment vars
+
+target: /tmp/crashy
+args: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+env: BLAH=test
+env: MYLIBPATH=/usr/lib

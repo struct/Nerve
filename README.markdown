@@ -85,14 +85,14 @@
 
 ## Usage
 
-    $ ruby nerve.rb --help
+    $ ruby nerve.rb  --help
 
-    Nerve 1.7 | Chris Rohlf 2009/2010
+    Nerve 1.8 | Chris Rohlf 2009-2011
 
     -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool | -p notepad.exe)
+    -x, --exec_proc FILE             Launch a process according to the configuration found in this file
     -b, --config_file FILE           Read all breakpoints and handler event configurations from this file
     -o, --output FILE                Dump all output to a file (default is STDOUT)
-    -k, --hook                       Automatically hook the entry and exit of a function call (Windows only)
     -f                               Optional flag indicates whether or not to trace forked child processes (Linux only)
 
 ## Configuration File Example

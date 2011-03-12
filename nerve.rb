@@ -210,6 +210,7 @@ class Nerve
             startup_info = Ragweed::Wrap32::StartupInfo.new
             target = FFI::MemoryPointer.from_string("#{exec_proc.target} #{exec_proc.args}")
             ## TODO: Port -f option to CreateProcess. We can pass along DEBUG_PROCESS
+            ## TODO: Environment variables (less important in win32)
             r = Ragweed::Wrap32::Win::CreateProcessA(nil, target, nil, nil, false, 0x0, nil, nil, startup_info, proc_info)
             @pid = proc_info[:pid] if r != 0
         else

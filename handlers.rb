@@ -4,6 +4,7 @@
 ## is also implemented by Ragweed.
 
 require 'common/constants'
+#require 'crash'
 
 case
 when RUBY_PLATFORM =~ WINDOWS_OS
@@ -49,9 +50,15 @@ when RUBY_PLATFORM =~ WINDOWS_OS
         end
 
         def on_access_violation(ev)
+            #puts "Exploitable? #{Crash.new(self).exploitable?}"
             exec_eh_script("on_access_violation", ev)
             dump_stats(ev)
             log.str "Access violation!"
+        end
+
+        def on_attach
+            exec_eh_script("on_attach")
+            super
         end
 
         def on_exit_process(ev)
@@ -133,10 +140,12 @@ when RUBY_PLATFORM =~ WINDOWS_OS
         end
 
         def on_heap_corruption(ev)
+            #puts "Exploitable? #{Crash.new(self).exploitable?}"
             exec_eh_script("on_heap_corruption", ev)
         end
 
         def on_buffer_overrun(ev)
+            #puts "Exploitable? #{Crash.new(self).exploitable?}"
             exec_eh_script("on_buffer_overrun", ev)
         end
 
@@ -207,8 +216,9 @@ when RUBY_PLATFORM =~ LINUX_OS
             log.str "Segmentation Fault!"
             exec_eh_script("on_segv")
             ## This need to be implemented in debuggerosx
-            ##self.print_registers
+            self.print_registers
             dump_stats
+            #Crash.new(self).exploitable?
             exit
         end
 
@@ -227,6 +237,14 @@ when RUBY_PLATFORM =~ LINUX_OS
             log.str "Illegal Instruction!"
             exec_eh_script("on_illegal_instruction")
             dump_stats
+        end
+
+        def on_iot_trap
+            log.str "IOT Trap!"
+            exec_eh_script("on_iot_trap")
+            dump_stats
+            self.print_registers
+            #Crash.new(self).exploitable?
         end
 
         def on_attach

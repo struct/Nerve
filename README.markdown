@@ -51,13 +51,13 @@
 
 	Nerve is a simple tool, but we plan to grow it with optional add ons:
 
-    - A waiting mode that runs and polls for new processes matching a target process description
     - Lots of helper scripts for breakpoints such as heap inspection, in memory fuzzing, SSL reads etc...
     - Helper methods and better named instance variables for making breakpoint scripts easier to write
     - Better output such as graphviz, statistics, function arguments etc...
     - An HTML5 canvas output mode
 	- A basic RubyWX GUI
 	- Redis database support
+    - Cleaner 1.8 and 1.9 support for launching processes
     - Nerve is also helping us find the areas of Ragweed that need the most improvement
 
 ## Requirements
@@ -98,7 +98,7 @@
 ## Configuration File Example
 
     Keywords in configuration files:
-    (order does not matter)
+    (the order does not matter but each line represents a unique breakpoint)
 
     bp - An address (or a symbolic name for Win32) where the debugger should set a breakpoint
     name - A name describing the breakpoint, typically a symbol or function name
@@ -119,6 +119,25 @@
 
     OS X Configuration Example:
     bp=0x12345678, name=function_name, bpc=6
+
+## Process Launching Configurations
+
+    You can instruct Nerve to launch a target process with arguments and environment
+    variables of your choosing. Nerve takes the -x flag along with a filename containing
+    your configuration. Be aware that Nerve currently uses system() to launch the process
+    which means stdout will be written to by the new process. Supporting Process.spawn()
+    is easy but its also not Ruby 1.9 compatible. This is on my list to rework!
+
+    Process launching configuration keywords
+
+    target - The location of the application you want to run
+    args - A string of arguments to pass to the application
+    env - A string of environment variables for the application
+
+    target: /usr/bin/gcalctool
+    args: -s 1+1
+    env: BLAH=test
+    env: MYLIBPATH=/usr/lib
 
 ## Breakpoint Scripts
 
@@ -171,6 +190,7 @@
     on_invalid_disposition
     on_invalid_handle
     on_load_dll
+    on_iot_trap
     on_output_debug_string
     on_priv_instruction
     on_rip

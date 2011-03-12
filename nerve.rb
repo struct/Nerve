@@ -1,8 +1,5 @@
 #!/usr/bin/env ruby
 
-## Nerve is a scriptable debugger built on Ragweed
-## Please refer to the README file for more information
-
 $: << File.dirname('..')
 
 require 'rubygems'
@@ -17,36 +14,43 @@ require 'common/constants'
 require 'common/helpers'
 
 class Nerve
-    attr_accessor :opts, :ragweed, :pid, :threads, :breakpoints, :so, :log, :event_handlers
+    attr_accessor :opts, :ragweed, :pid, :threads, :breakpoints, :so, :log, :event_handlers, :exec_proc
 
     def initialize(opts)
         @opts = opts
         @pid = opts[:pid]
         @breakpoints = Array.new
+        @exec_proc = OpenStruct.new
         @event_handlers = Hash.new
         @threads = Array.new
         @out = opts[:out]
         @log = NerveLog.new(@out)
+
+        parse_exec_proc(opts[:ep_file]) if !opts[:ep_file].nil?
+
+        launch_process if !exec_proc.target.nil?
 
         case
             when RUBY_PLATFORM =~ WINDOWS_OS
 
                 parse_config_file(opts[:bp_file])
 
-                if @pid.kind_of?(String) and @pid.to_i == 0
-                    @ragweed = NerveWin32.find_by_regex(/#{@pid}/)
+                if pid.kind_of?(String) and pid.to_i == 0
+                    while @ragweed.nil?
+                        @ragweed = NerveWin32.find_by_regex(/#{pid}/)
+                    end
                 else
-                    @ragweed = NerveWin32.new(@pid.to_i)
+                    @ragweed = NerveWin32.new(pid.to_i)
                 end
 
                 if @ragweed.nil?
-                    puts "Failed to find process: #{@pid}"
+                    puts "Failed to find process: #{pid}"
                     exit
                 end
 
                 @ragweed.log_init(log)
 
-                ## FIX: debugger32 threads returns an OStruct
+                ## TODO: debugger32 threads returns an OStruct
                 ## and pid is not always a Numeric value
                 @threads = @ragweed.process.threads(true)
 
@@ -57,18 +61,17 @@ class Nerve
                 end
 
             when RUBY_PLATFORM =~ LINUX_OS
-
-                if @pid.kind_of?(String) and @pid.to_i == 0
-                    @pid = NerveLinux.find_by_regex(/#{@pid}/).to_i
+                if pid.kind_of?(String) and pid.to_i == 0
+                    @pid = NerveLinux.find_by_regex(/#{pid}/).to_i
                 else
-                    @pid = @pid.to_i
+                    @pid = pid.to_i
                 end
 
-                @so = NerveLinux.shared_libraries(@pid)
+                @so = NerveLinux.shared_libraries(pid)
                 
                 parse_config_file(opts[:bp_file])
 
-                @threads = NerveLinux.threads(@pid)
+                @threads = NerveLinux.threads(pid)
                 self.which_threads
 
                 lo = {}
@@ -77,10 +80,10 @@ class Nerve
                     lo[:fork] = true
                 end
 
-                @ragweed = NerveLinux.new(@pid, lo)
+                @ragweed = NerveLinux.new(pid, lo)
 
                 if @ragweed.nil?
-                    puts "Failed to find process: #{@pid}"
+                    puts "Failed to find process: #{pid}"
                     exit
                 end
 
@@ -90,16 +93,16 @@ class Nerve
 
                 parse_config_file(opts[:bp_file])
 
-                if @pid.kind_of?(String) and @pid.to_i.nil?
-                    @pid = NerveOSX.find_by_regex(/#{@pid}/)
+                if pid.kind_of?(String) and pid.to_i.nil?
+                    @pid = NerveOSX.find_by_regex(/#{pid}/)
                 else
-                    @pid = @pid.to_i
+                    @pid = pid.to_i
                 end
 
-                @ragweed = NerveOSX.new(@pid)
+                @ragweed = NerveOSX.new(pid)
 
                 if @ragweed.nil?
-                    puts "Failed to find process: #{@pid}"
+                    puts "Failed to find process: #{pid}"
                     exit
                 end
 
@@ -139,9 +142,7 @@ class Nerve
             exit
         end
 
-        catch(:throw) do
-            @ragweed.loop
-        end
+        catch(:throw) { @ragweed.loop }
 
         ## This is commented out because the stats should
         ## have been dumped already if we reached this
@@ -163,33 +164,25 @@ class Nerve
                 when RUBY_PLATFORM =~ WINDOWS_OS
                     if opts[:hook] == true
                         @ragweed.hook(bp.addr, bp.nargs) do |evt, ctx, dir, args|
+                            eval(bp.code) if !bp.code.nil?
 
-                            if !bp.code.nil?
-                                eval(bp.code)
-                            end
-
-                            if dir.to_s =~ /enter/
-                                bp.hits += 1
-                            end
+                            bp.hits += 1 if dir.to_s =~ /enter/
 
                             check_bp_max(bp, ctx)
                         end
                     else
                         @ragweed.breakpoint_set(bp.addr) do |evt, ctx|
-                            if !bp.code.nil?
-                                eval(bp.code)
-                            end
+                            eval(bp.code) if !bp.code.nil?
 
                             bp.hits += 1
+
                             check_bp_max(bp, ctx)
                         end
                     end
 
                 when RUBY_PLATFORM =~ LINUX_OS, RUBY_PLATFORM =~ OSX_OS
                     @ragweed.breakpoint_set(bp.addr.to_i(16), bp.name, (bpl = proc do 
-                        if !bp.code.nil?
-                            eval(bp.code)
-                        end
+                        eval(bp.code) if !bp.code.nil?
 
                         bp.hits += 1
 
@@ -209,10 +202,28 @@ class Nerve
            bp.flag = false
         end
     end
+
+    def launch_process
+        if RUBY_PLATFORM =~ WINDOWS_OS
+            exec_proc.env.each_pair { |k,v| ENV[k] = v }
+            proc_info = Ragweed::Wrap32::ProcessInfo.new
+            startup_info = Ragweed::Wrap32::StartupInfo.new
+            target = FFI::MemoryPointer.from_string("#{exec_proc.target} #{exec_proc.args}")
+            ## TODO: Port -f option to CreateProcess. We can pass along DEBUG_PROCESS
+            r = Ragweed::Wrap32::Win::CreateProcessA(nil, target, nil, nil, false, 0x0, nil, nil, startup_info, proc_info)
+            @pid = proc_info[:pid] if r != 0
+        else
+            @pid = fork do
+                exec_proc.env.each_pair { |k,v| ENV[k] = v }
+                exec("#{exec_proc.target} #{exec_proc.args}")
+            end
+        end
+    end
 end
 
 NERVE_OPTS = {
-    :pid => 0,
+    :pid => nil,
+    :pe_file => nil,
     :bp_file => nil,
     :out => STDOUT,
     :hook => false,
@@ -220,10 +231,14 @@ NERVE_OPTS = {
 }
 
 opts = OptionParser.new do |opts|
-    opts.banner = "\nNerve #{NERVE_VERSION} | Chris Rohlf 2009/2010\n\n"
+    opts.banner = "\nNerve #{NERVE_VERSION} | Chris Rohlf 2009-2011\n\n"
 
     opts.on("-p", "--pid PID/Name", "Attach to this pid OR process name (ex: -p 12345 | -p gcalctool | -p notepad.exe)") do |o|
         NERVE_OPTS[:pid] = o
+    end
+
+    opts.on("-x", "--exec_proc FILE", "Launch a process according to the configuration found in this file") do |o|
+        NERVE_OPTS[:ep_file] = o
     end
 
     opts.on("-b", "--config_file FILE", "Read all breakpoints and handler event configurations from this file") do |o|
@@ -252,9 +267,9 @@ end
 
 opts.parse!(ARGV) rescue (STDERR.puts $!; exit 1)
 
-if NERVE_OPTS[:pid] == nil || NERVE_OPTS[:bp_file] == nil
+if NERVE_OPTS[:pid] == nil
     puts opts.banner
-    exit
+#    exit
 end
 
 ## Never is still under heavy development

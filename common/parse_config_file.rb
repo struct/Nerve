@@ -1,22 +1,68 @@
 class Nerve
-    ## This could use some work
+    def parse_exec_proc(file)
+
+        return if file.nil?
+
+        fd = File.open(file)
+        proc_control = %w[ target args env ]
+
+        lines = fd.readlines
+        lines.map { |x| x.chomp }
+
+        exec_proc.args = Array.new
+        exec_proc.env = Hash.new
+
+        lines.each do |tl|
+            if tl[0].chr == ';' or tl.nil? then next end
+
+            k,v,l = tl.split(':')
+
+            if k.match(/target/)
+                ## Dirty little hack if a : is used
+                ## in the target path (C:\Windows...)
+                if !l.nil?
+                    v = "#{v}:#{l}"
+                end
+                v.gsub!(/[\n]+/, "")
+                v.gsub!(/[\s]+/, "")
+                exec_proc.target = v
+            end
+
+            if k.match(/args/)
+                v.gsub!(/[\n]+/, "")
+                exec_proc.args = v
+            end
+
+            if k.match(/env/)
+                v.gsub!(/[\n]+/, "")
+                k,v = v.split(/=/)
+                k.gsub!(/[\s]+/, "")
+                exec_proc.env.store(k,v)
+            end
+        end
+    end
+
     def parse_config_file(file)
+
+        return if file.nil?
+
         fd = File.open(file)
 
         ## All the handlers a user can script
+        ## There is no specific order to this
         hdlrs = %w[ on_access_violation on_alignment on_attach on_bounds on_breakpoint on_continue
                     on_create_process on_create_thread on_detach on_divide_by_zero on_exit on_exit_process
                     on_exit_thread on_fork_child on_illegalinst on_int_overflow on_invalid_disposition
                     on_invalid_handle on_load_dll on_output_debug_string on_priv_instruction on_rip on_segv
                     on_signal on_sigstop on_sigchild on_sigterm on_sigtrap on_single_step on_stack_overflow
-                    on_stop on_unload_dll ]
+                    on_stop on_unload_dll on_iot_trap on_guard_page ]
 
         lines = fd.readlines
         lines.map { |x| x.chomp }
 
         lines.each do |tl|
 
-            if tl.match(';') or tl.nil? then next end
+            if tl[0].chr == ';' or tl.nil? then next end
 
             hdlrs.each do |l|
               if tl.match(/#{l}/)

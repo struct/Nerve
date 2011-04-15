@@ -124,8 +124,8 @@
 
     You can instruct Nerve to launch a target process with arguments and environment
     variables of your choosing. Nerve takes the -x flag along with a filename containing
-    your configuration. Be aware that Nerve currently uses system() to launch the process
-    which means stdout will be written to by the new process. Supporting Process.spawn()
+    your configuration. Be aware that Nerve currently uses exec() to launch processes on
+    nix. This means stdout will be written to by the new process. Supporting Process.spawn()
     is easy but its also not Ruby 1.9 compatible. This is on my list to rework!
 
     Process launching configuration keywords

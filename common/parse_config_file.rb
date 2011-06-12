@@ -79,6 +79,7 @@ class Nerve
             bp.base = 0
 			bp.flag = true
 			bp.hits = 0
+            bp.hook = false
             bp.bpc = nil
             bp.nargs = 0
 
@@ -95,6 +96,12 @@ class Nerve
                 if e.match(/name=/)
                     name = e.split("name=").last
                     bp.name = name.gsub(/[\s\n]+/, "")
+                end
+
+                ## Win32 only until ragweed supports it
+                if e.match(/hook=/)
+                    hook = e.split("hook=").last
+                    bp.hook = true if hook.gsub(/[\s\n]+/, "") =~ /true/
                 end
 
                 if e.match(/bpc=/)

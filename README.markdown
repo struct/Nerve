@@ -105,7 +105,8 @@
     lib - An optional library name indicating where the symbol can be found, only useful with Linux/OSX
     bpc - Number of times to let this breakpoint hit before uninstalling it
     code - Location of a script that holds ruby code to be executed when this breakpoint hits
-    nargs - The number of arguments the function takes (only used with Win32 right now)
+    nargs - The number of arguments the function takes (only used with Win32)
+    hook - A true or false configuration to hook both a function entry and exit (Win32 only)
 
     --
 

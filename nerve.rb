@@ -161,7 +161,7 @@ class Nerve
 
             case
                 when RUBY_PLATFORM =~ WINDOWS_OS
-                    if opts[:hook] == true
+                    if bp.hook == true
                         @ragweed.hook(bp.addr, bp.nargs) do |evt, ctx, dir, args|
                             eval(bp.code) if !bp.code.nil?
 
@@ -247,14 +247,6 @@ opts = OptionParser.new do |opts|
 
     opts.on("-o", "--output FILE", "Dump all output to a file (default is STDOUT)") do |o|
         NERVE_OPTS[:out] = File.open(o, "w") rescue (bail $!)
-    end
-
-    ## FIX: When hook() is available on all three
-    ## platforms this conditional should go away
-    if RUBY_PLATFORM =~ WINDOWS_OS
-        opts.on("-k", "--hook", "Automatically hook the entry and exit of a function call (Windows only)") do |o|
-            NERVE_OPTS[:hook] = true
-        end
     end
 
     ## FIX: Port this feature when Ragweed is ready

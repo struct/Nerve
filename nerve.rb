@@ -226,7 +226,6 @@ NERVE_OPTS = {
     :pe_file => nil,
     :bp_file => nil,
     :out => STDOUT,
-    :hook => false,
     :fork => false
 }
 

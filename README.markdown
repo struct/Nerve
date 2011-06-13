@@ -87,7 +87,7 @@
 
     $ ruby nerve.rb  --help
 
-    Nerve 1.8 | Chris Rohlf 2009-2011
+    Nerve 1.9 | Chris Rohlf 2009-2011
 
     -p, --pid PID/Name               Attach to this pid OR process name (ex: -p 12345 | -p gcalctool | -p notepad.exe)
     -x, --exec_proc FILE             Launch a process according to the configuration found in this file

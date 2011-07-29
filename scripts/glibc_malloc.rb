@@ -13,11 +13,13 @@ size = Ragweed::Wraptux::ptrace(Ragweed::Wraptux::Ptrace::PEEK_TEXT, @pid, regs.
 locs = @ragweed.search_heap(0x41414141)
 
 if !locs.empty?
-    puts "0x41414141 found at:"
+  puts "0x41414141 found at:"
     locs.map do |l|
-        puts " -> #{l.to_s(16)} #{@ragweed.get_mapping_name(l)}"
+      l.map do |i|
+        puts " -> #{i.to_s(16)} #{@ragweed.get_mapping_name(i)}"
+      end
     end
 end
 
-puts "Stack => #{@ragweed.get_stack_range.inspect}"
-puts "Heap => #{@ragweed.get_heap_range.inspect}"
+puts "Stack => 0x#{@ragweed.get_stack_range.first.first.to_s(16)} ... 0x#{@ragweed.get_stack_range.last.last.to_s(16)}"
+puts "Heap => 0x#{@ragweed.get_heap_range.first.first.to_s(16)} ... 0x#{@ragweed.get_heap_range.last.last.to_s(16)}"

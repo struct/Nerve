@@ -1,0 +1,16 @@
+; This is how you set breakpoints within shared objects
+; You can use 'readelf -s' to get the proper address for
+; a function inside of your shared object.
+; The order of the parameters does not matter
+; This example will only work with 32-bit Ubuntu 11.04
+
+bp=0x0006fef0 name=malloc, lib=/lib/i386-linux-gnu/libc-2.13.so, bpc=5, code=scripts/glibc_malloc.rb
+bp=0x00075520, name=memcpy, lib=/lib/i386-linux-gnu/libc-2.13.so
+bp=0x000703b0, name=free, lib=/lib/i386-linux-gnu/libc-2.13.so
+bp=0x000bfe50, name=read, lib=/lib/i386-linux-gnu/libc-2.13.so
+bp=0x000bfed0, name=write, lib=/lib/i386-linux-gnu/libc-2.13.so
+on_attach=scripts/on_attach.rb
+
+; gcalctool example
+;bp=0x08063e10, name=mp_add
+;on_breakpoint=scripts/on_breakpoint.rb

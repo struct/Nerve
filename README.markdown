@@ -27,13 +27,9 @@
 
     Nerve is supported and has been tested on the following platforms:
 
-    Windows 7
-    Windows XP SP3
-    Ubuntu Linux 10.10
-    Ubuntu Linux 10.4
-    Ubuntu Linux 9.10
-    Mac OS X 10.6
-    Mac OS X 10.5
+    Windows XP, 7
+    Ubuntu Linux 9.10 -> 11.04
+    Mac OS X 10.5, 10.6
 
     Ruby 1.8.7
     Ruby 1.9.x

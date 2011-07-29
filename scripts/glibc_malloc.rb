@@ -21,5 +21,7 @@ if !locs.empty?
     end
 end
 
-puts "Stack => 0x#{@ragweed.get_stack_range.first.first.to_s(16)} ... 0x#{@ragweed.get_stack_range.last.last.to_s(16)}"
-puts "Heap => 0x#{@ragweed.get_heap_range.first.first.to_s(16)} ... 0x#{@ragweed.get_heap_range.last.last.to_s(16)}"
+stack = @ragweed.get_stack_range
+heap = @ragweed.get_heap_range
+puts "Stack => 0x#{stack.first.first.to_s(16)} ... 0x#{stack.first.last.to_s(16)}" if !stack.empty?
+puts "Heap => 0x#{heap.first.first.to_s(16)} ... 0x#{heap.first.last.to_s(16)}" if !heap.empty?

@@ -1,3 +1,3 @@
 ; Please see scripts/Win32_SSL_read.rb
 
-bp=SSL_read!ssleay32, name=SSL_read, code=scripts/Win32_SSL_read.rb
+bp=ssleay32!SSL_read, name=SSL_read, code=scripts/Win32_SSL_read.rb, hook=true

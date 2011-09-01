@@ -6,7 +6,7 @@ if dir.to_s =~ /leave/
 
     @log.str "Read #{len.to_s(16)} from #{addr.to_s(16)}; #{@ragweed.process.read32(ctx.esp).to_s(16)}"
 
-    if len != 0xffffffff
+    if len != -1
         buf = @ragweed.process.read(addr, len)
         @log.str "Read #{len} from #{addr} got:"
         @log.str buf

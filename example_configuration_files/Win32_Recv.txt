@@ -1,4 +1,4 @@
 ; Please see scripts/Win32_Recv_Fuzz.rb
 
-bp=ws2_32!recv, name=recv, code=scripts/Win32_Recv_Fuzz.rb
-;bp=wsock32!recv, name=recv, code=scripts/Win32_Recv_Fuzz.rb
+bp=ws2_32!recv, name=recv, code=scripts/Win32_Recv_Fuzz.rb, hook=true
+;bp=wsock32!recv, name=recv, code=scripts/Win32_Recv_Fuzz.rb, hook=true

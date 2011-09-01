@@ -208,7 +208,7 @@
 
 ## Examples
 
-    Heres some example output from Nerve running on Ubuntu:
+    Heres some example output from Nerve running on Ubuntu Linux:
 
     chris@ubuntu:/# ruby nerve.rb -b example_configuration_files/generic_ubuntu_910_libc_trace.txt -p test
     Nerve ...
@@ -230,9 +230,8 @@
     ... Done!
 
     Here is Nerve running on Windows 7 and debugging an example program that calls HeapAlloc. For
-    this test program we want to run a simple ruby script each time we enter and leave HeapAlloc()
-
-    Test Program:
+    this test program we want to run a simple ruby script each time we enter and leave RtlAllocateHeap.
+    This script should extract the arguments to the function upon entry and the return values on exit.
 
     ...
     #include <stdio.h>
@@ -257,7 +256,7 @@
     Here is the configuration file:
 
     ...
-    bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/RtlAllocateHeap.rb
+    bp=ntdll!RtlAllocateHeap, name=RtlAllocateHeap, code=scripts/RtlAllocateHeap.rb, hook=true
     ...
 
     And here is the scripts/RtlAllocateHeap.rb referenced in the configuration file:
@@ -265,31 +264,35 @@
     ...
     ## This script is for Win32 RtlAllocateHeap
 
-    if dir.to_s =~ /enter/
-        log.str "Size requested #{@ragweed.process.read32(ctx.esp+12)}"
-        log.str "Heap handle is @ #{@ragweed.process.read32(ctx.esp+4).to_s(16)}"
-    else
-        log.str "Heap chunk returned @ #{ctx.eax.to_s(16)}"
+    begin
+      if dir.to_s =~ /enter/
+        @log.str "RtlAllocateHeap -> Size requested #{@ragweed.process.read32(ctx.esp+12)}"
+        @log.str "RtlAllocateHeap -> Heap handle is @ #{@ragweed.process.read32(ctx.esp+4).to_s(16)}"
+      else
+        @log.str "RtlAllocateHeap <- Heap chunk returned @ #{ctx.eax.to_s(16)}"
+      end
+    rescue =>
+      puts "Does your configuration use hook=true?"
     end
     ...
 
     Below is the output of hooking the malloc.exe program:
 
-    PS C:\My Dropbox\Nerve> ruby .\nerve.rb -p malloc.exe -b .\example_configuration_files\Win32_notepad.txt
+    PS C:\Nerve> ruby .\nerve.rb -p test.exe -b .\example_configuration_files\Win32_notepad.txt
     Nerve ...
     Setting breakpoint: [ ntdll!RtlAllocateHeap, RtlAllocateHeap ]
-    Size requested 1024
-    Heap handle is @ 750000
-    Heap chunk returned @ 750590
-    Size requested 1024
-    Heap handle is @ 750000
-    Heap chunk returned @ 750590
-    Size requested 1024
-    Heap handle is @ 750000
-    Heap chunk returned @ 750590                    <- This is where I CTRL+C the test program
-    Size requested 24
-    Heap handle is @ 470000
-    Heap chunk returned @ 47f640
+    RtlAllocateHeap -> Size requested 1024
+    RtlAllocateHeap -> Heap handle is @ 750000
+    RtlAllocateHeap -> Heap chunk returned @ 750590
+    RtlAllocateHeap -> Size requested 1024
+    RtlAllocateHeap -> Heap handle is @ 750000
+    RtlAllocateHeap -> Heap chunk returned @ 750590
+    RtlAllocateHeap -> Size requested 1024
+    RtlAllocateHeap -> Heap handle is @ 750000
+    RtlAllocateHeap -> Heap chunk returned @ 750590         <- ( This is where I CTRL+C the test program )
+    RtlAllocateHeap -> Size requested 24
+    RtlAllocateHeap -> Heap handle is @ 470000
+    RtlAllocateHeap -> Heap chunk returned @ 47f640
 
     CONTEXT:
     EIP: 77b564f4
@@ -307,6 +310,15 @@
     Pid is 3224
     Tid is 4048
     ntdll!RtlAllocateHeap - RtlAllocateHeap | 4
+
+## Useful Tips
+
+    - If you need to declare some global variables you should do it in an on_attach
+      script. This code will only run once when the debugger attaches to the target.
+
+    - On windows you can launch Nerve before launching your process. This avoids the
+      the need for a process launching script. This is a side effect of how Ragweed
+      is designed. This should be the default for all platforms in the future.
 
 ## Disassembly
 

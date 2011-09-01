@@ -107,7 +107,7 @@
     --
 
     Win32 Configuration Example:
-    bp=0x12345678, name=SomeFunction, bpc=2, code=scripts/SomeFunctionAnalysis.rb
+    bp=0x12345678, name=SomeFunction, bpc=2, code=scripts/SomeFunctionAnalysis.rb, hook=true
     bp=kernel32!CreateFileW, name=CreateFileW, code=scripts/CreateFileW_Analysis.rb
 
     Linux Configuration Example:

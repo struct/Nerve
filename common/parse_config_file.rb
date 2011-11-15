@@ -109,7 +109,7 @@ class Nerve
                     bp.bpc = bpc.to_i
                 end
 
-                if e.match(/bpc=/)
+                if e.match(/nargs=/)
                     nargs = e.split("nargs=").last
                     bp.nargs = nargs.to_i
                 end

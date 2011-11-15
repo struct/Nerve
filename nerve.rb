@@ -11,6 +11,7 @@ require 'common/output'
 require 'common/common'
 require 'common/constants'
 require 'common/helpers'
+require 'common/extends'
 
 class Nerve
     attr_accessor :opts, :ragweed, :pid, :threads, :breakpoints, :so, :log, :event_handlers, :exec_proc

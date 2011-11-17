@@ -121,7 +121,7 @@ class Nerve
         bp_count = 0
         @breakpoints.each {|b| bp_count+=1 if b.flag == true }
 
-        log.str "#{bp_count} Breakpoints set ..."
+        log.str "#{bp_count} Breakpoint(s) set ..."
 
         @ragweed.save_breakpoints(@breakpoints)
 

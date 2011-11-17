@@ -43,17 +43,17 @@
     - Extend Nerve through handlers.rb or output.rb with minimal code changes
     - Nerve comes with a few example breakpoint scripts such as hooking RtlAllocateHeap/malloc
 
-## Todo
+## Todo / Ideas
 
-	Nerve is a simple tool, but we plan to grow it with optional add ons:
+	Nerve is a simple tool, but the plan is to grow it with optional add ons and more...
 
     - Lots of helper scripts for breakpoints such as heap inspection, in memory fuzzing, SSL reads etc...
     - Helper methods and better named instance variables for making breakpoint scripts easier to write
     - Better output such as graphviz, statistics, function arguments etc...
-    - An HTML5 canvas output mode
-	- A basic RubyWX GUI
-	- Redis database support
+	- Redis database support for offline analysis of output
     - Cleaner 1.8 and 1.9 support for launching processes
+    - Continous re-attach to any targets that match the process name
+    - Change the configuration to Ruby code (the text file will be an optional fallback)
     - Nerve is also helping us find the areas of Ragweed that need the most improvement
 
 ## Requirements
@@ -67,9 +67,9 @@
 
     ... OR ...
 
-    gem install -r ragweed   (you might get an older version)
+    gem install -r ragweed   (you might get an older version!)
 
-    Ragweed requires FFI which you install with rubygems:
+    Ragweed requires FFI which you can install with rubygems:
 
     gem install -r ffi
 

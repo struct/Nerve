@@ -166,22 +166,27 @@ class Crash
         stack_range = @ragweed.get_stack_range
         heap_range = @ragweed.get_heap_range
 
-        case reg
-            when stack_range.first..stack_range.last
-                puts "Executing instructions from the stack - EXPLOITABLE"
-                return EXPLOITABLE
+        stack_range.each do |s|
+            if reg == s.first..s.last
+              puts "Executing instructions from the stack - EXPLOITABLE"
+              return EXPLOITABLE
+            end
+        end
 
+        heap_range.each do |h|
+            if reg == h.first..h.last
+              puts "Executing instructions from the heap - EXPLOITABLE"
+              return EXPLOITABLE
+            end
+        end
+
+        case reg
             when 0x41414141
                 puts "Register is controllable AAAA... - EXPLOITABLE"
                 return EXPLOITABLE
-
-            when heap_range.first..heap_range.last
-                puts "Executing instructions from the heap - EXPLOITABLE"
-                return EXPLOITABLE
-
             when 0x0..0x1000
                 puts "NULL Pointer dereference - NOT EXPLOITABLE (unless you control the offset from NULL)"
                 return NOT_EXPLOITABLE
         end
-    end
+    end 
 end
